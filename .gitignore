@@ -1,0 +1,19 @@
+# virtual environments
+venv/
+.venv/
+env/
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# generated experiment artifacts (reproducible via run_experiments.py)
+results/
+figures/
+
+# OS
+.DS_Store
+Thumbs.db
+.cb-claude.log

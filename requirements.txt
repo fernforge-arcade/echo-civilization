@@ -1,0 +1,4 @@
+numpy
+matplotlib
+networkx
+# sqlite3 is part of the Python standard library

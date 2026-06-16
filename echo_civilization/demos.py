@@ -1,0 +1,113 @@
+"""Standalone demonstrations of the individual subsystems, used to populate the
+research report with concrete evidence that each mechanism works:
+
+  - Echo World  : tabular Q-learning genuinely learns to copy (individual learning)
+  - Memory World: retention vs. forgetting, and fact transfer between agents
+  - Grid World  : a neural-net policy is improved by evolution across generations
+  - Social World: a shared communication protocol emerges from meaningless symbols
+"""
+
+from __future__ import annotations
+
+import numpy as np
+
+from .agent import Agent
+from .environments import GridWorld, MemoryWorld, SocialWorld
+from .environments.grid_world import N_ACTIONS, OBS_DIM
+from .learning import NeuralPolicy, QLearner
+from .skills import ALPHABET
+
+
+def echo_qlearning_demo(seed: int = 0, episodes: int = 80):
+    """A single agent learns the identity (copy) character map from reward.
+
+    The plotted curve is the *greedy* (exploitation) accuracy after each training
+    episode, so it reflects what the agent has actually learned rather than its
+    exploration noise."""
+    rng = np.random.default_rng(seed)
+    ql = QLearner(n_actions=len(ALPHABET), rng=rng, epsilon=0.5,
+                  epsilon_decay=0.93, alpha=0.5)
+    curve = []
+    target_map = {c: c for c in ALPHABET}  # echo == identity
+    for _ in range(episodes):
+        # one training pass (with exploration)
+        for ch in ALPHABET:
+            s = ALPHABET.index(ch)
+            a = ql.act(s)
+            r = 1.0 if ALPHABET[a] == target_map[ch] else -0.1
+            ql.observe(s, a, r, s, True)
+        ql.decay_epsilon()
+        # measure greedy accuracy
+        greedy = ql.greedy_map()
+        correct = sum(1 for ch in ALPHABET
+                      if ALPHABET[greedy.get(ALPHABET.index(ch), -1)] == target_map[ch])
+        curve.append(correct / len(ALPHABET))
+    return {"curve": curve, "final_accuracy": curve[-1],
+            "episodes_to_mastery": next((i for i, v in enumerate(curve) if v >= 1.0), None)}
+
+
+def memory_demo(seed: int = 0, delays=(0, 5, 10, 20, 40, 60), trials: int = 60):
+    """Retention as a function of delay (forgetting curve), plus a transfer test."""
+    rng = np.random.default_rng(seed)
+    retention = {}
+    for delay in delays:
+        world = MemoryWorld(rng, delay=delay)
+        scores = []
+        for _ in range(trials):
+            agent = Agent(0, rng)
+            agent.long_term.decay = 0.04  # forgetting rate for the curve
+            res = world.run_episode(agent)
+            scores.append(res["salience"])  # graded retention strength
+        retention[delay] = float(np.mean(scores))
+
+    # knowledge transfer: a knower teaches a naive agent a fact
+    world = MemoryWorld(rng, delay=2)
+    teacher = Agent(0, rng)
+    teacher.long_term.remember_fact("treasure", "blue door", 1.0)
+    student = Agent(0, rng)
+    before = student.long_term.recall_fact("treasure")
+    world.transfer_fact(teacher, student, "treasure")
+    after = student.long_term.recall_fact("treasure")
+    transfer_ok = (before is None) and (after == "blue door")
+    return {"retention_by_delay": retention, "transfer_ok": transfer_ok}
+
+
+def grid_evolution_demo(seed: int = 0, generations: int = 30, pop: int = 40,
+                        elite_frac: float = 0.25, lives: int = 5):
+    """Evolve a population of MLP policies on the grid world (ES, no backprop).
+
+    Uses elitism (the best policies survive unmutated) plus mutated offspring, and
+    averages several lives per evaluation to cut the noise of random maps."""
+    rng = np.random.default_rng(seed)
+    world = GridWorld(rng, n_hazards=4, max_steps=70)
+    layers = [OBS_DIM, 12, N_ACTIONS]
+    pop_nets = [NeuralPolicy(layers, rng) for _ in range(pop)]
+
+    def evaluate(net):
+        return float(np.mean([world.run_episode(net)["reward"] for _ in range(lives)]))
+
+    curve = []
+    n_elite = max(2, int(elite_frac * pop))
+    for g in range(generations):
+        scores = np.array([evaluate(net) for net in pop_nets])
+        order = np.argsort(scores)[::-1]
+        curve.append({"avg": float(scores.mean()), "best": float(scores.max())})
+        elites = [pop_nets[i] for i in order[:n_elite]]
+        children = [e.clone() for e in elites]  # elitism: carry survivors over
+        while len(children) < pop:
+            parent = elites[int(rng.integers(0, len(elites)))]
+            child = parent.clone()
+            child.mutate(rate=0.15, scale=0.12)
+            children.append(child)
+        pop_nets = children
+    return {"curve": curve, "final_best": curve[-1]["best"],
+            "initial_best": curve[0]["best"]}
+
+
+def social_demo(seed: int = 0, n_agents: int = 6, rounds: int = 200,
+                n_concepts: int = 3):
+    """Run the Lewis signalling game; a protocol should emerge from scratch."""
+    rng = np.random.default_rng(seed)
+    world = SocialWorld(rng, n_concepts=n_concepts, n_symbols=n_concepts)
+    agents = [Agent(0, rng) for _ in range(n_agents)]
+    return world.run(agents, rounds=rounds)
