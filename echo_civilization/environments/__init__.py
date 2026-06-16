@@ -7,8 +7,11 @@ from .transformation_world import TransformationWorld
 from .memory_world import MemoryWorld
 from .grid_world import GridWorld
 from .social_world import SocialWorld
+from .computer_world import ComputerWorld
+from .real_computer_world import RealComputerWorld
 
 __all__ = [
     "Task", "StringEnvironment", "EchoWorld", "TransformationWorld",
-    "MemoryWorld", "GridWorld", "SocialWorld",
+    "MemoryWorld", "GridWorld", "SocialWorld", "ComputerWorld",
+    "RealComputerWorld",
 ]

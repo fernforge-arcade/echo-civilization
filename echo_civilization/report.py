@@ -266,6 +266,36 @@ def generate_report(results, demos_out, figures, path="research_report.md",
       "`experiments`, `generations`, `agents`, `skills`, `propagation`, `rewards`. "
       "Figures are written to `figures/`.\n")
 
+    # ---------------------------------------------------------------- roadmap
+    w("\n## 7. Roadmap — toward open-ended, autonomous agents\n")
+    w("The progression deliberately raises the *level of abstraction* at which "
+      "agents act, while keeping one mechanism constant: cumulative, recombinable, "
+      "inheritable skill.\n")
+    w("1. **Echo → Transformation → Memory/Grid/Social** *(done)* — primitive "
+      "learning, memory, evolved control, emergent language.\n")
+    w("2. **Computer World** *(done, Exp. E)* — operate a *simulated* VM; climb an "
+      "auto-curriculum of multi-step file pipelines.\n")
+    w("3. **Real Computer World** *(done, Exp. F)* — the same skills execute as "
+      "**real sandboxed shell commands**; agents are literal (bounded) computer-use "
+      "agents.\n")
+    w("4. **Open shell + learned arguments** *(next)* — widen the primitive set "
+      "toward a fuller sandboxed shell and learn command *arguments/values*, not "
+      "just operation order; agents propose and verify their own sub-tasks.\n")
+    w("5. **Autonomous-operation World** *(planned)* — the highest abstraction: a "
+      "persistent environment where an agent (or guild of specialised agents) "
+      "pursues a long-lived open-ended objective — e.g. *running a simulated "
+      "business* — by decomposing goals into sub-goals, delegating to specialists, "
+      "trading, maintaining state across long horizons, and being selected on "
+      "sustained outcome rather than single-task success. The civilization "
+      "machinery already built (skills, culture, teaching, reputation, "
+      "inheritance, specialization) is the substrate; what is added is hierarchical "
+      "goal decomposition and an economy with continuous, never-terminating "
+      "evaluation.\n")
+    w("\nThroughout, the claim is **not** that this is AGI, but that *cultural "
+      "accumulation is the missing ingredient that lets simple agents keep getting "
+      "more capable without bound* — and that this same lever operates at each "
+      "rung from copying a string to operating a real computer.\n")
+
     Path(path).write_text("".join(lines), encoding="utf-8")
     return path
 
@@ -332,3 +362,38 @@ def _computer_section(w, computer, demos_out):
         for s in top:
             w(f"| {s.name} | {'→'.join(s.program)} | {s.complexity()} | "
               f"{s.adoption} | {s.reputation:.1f} |\n")
+
+    # ----- Experiment F: real sandboxed OS -----
+    real = demos_out.get("real_os")
+    if real:
+        rows = real["rows"]
+        w("\n### 3.5 From simulation to a real OS (Experiment F)\n")
+        w("The Computer World above is simulated. To check the skills are *real*, "
+          "**Real Computer World** maps every primitive op to an actual coreutils "
+          "command (`cat`, `grep`, `sort`, `uniq`, `wc`, `tr`, `tac`, `cp`) run by "
+          "`bash` in a throwaway temp sandbox (whitelisted commands, quoted args, "
+          "minimal env, timeout — no network). An agent's macros transfer "
+          "**unchanged** from the simulated world to the real shell.\n")
+        w("We compare a *cultured* agent (inherited macros) with a *fresh* agent "
+          f"(empty library, budget {real['fresh_budget']} real executions) on the "
+          "same real tasks:\n")
+        w("\n| level | task | cultured solved | cultured shell cmds | fresh solved | fresh shell cmds |\n")
+        w("|---|---|---|---|---|---|\n")
+        for r in rows:
+            w(f"| {r['level']} | `{r['name']}` | "
+              f"{'✅' if r['cultured_solved'] else '❌'} | {r['cultured_shell_calls']} | "
+              f"{'✅' if r['fresh_solved'] else '❌'} | {r['fresh_shell_calls']} |\n")
+        n_cult = sum(r["cultured_solved"] for r in rows)
+        n_fresh = sum(r["fresh_solved"] for r in rows)
+        w(f"\nThe cultured agent solved **{n_cult}/{len(rows)}** real tasks; the "
+          f"fresh agent solved only **{n_fresh}/{len(rows)}** before exhausting its "
+          f"real-execution budget. Inherited skill makes real computer use cheap; "
+          f"from scratch it is prohibitively expensive — the accumulation thesis "
+          f"holds against a genuine operating system.\n")
+        tr = real.get("trace")
+        if tr:
+            w(f"\nA real command trace (level {tr['level']}, `{tr['name']}`, keyword "
+              f"*\"{tr['keyword']}\"*) the agent actually executed in its sandbox:\n")
+            w("\n```bash\n" + "\n".join(tr["commands"]) + "\n```\n")
+            w(f"produced `{tr['output']!r}` (expected `{tr['expected']!r}`).\n")
+        w("\n![Real OS shell: cost to solve, cultured vs fresh](figures/14_real_os_shell.png)\n")

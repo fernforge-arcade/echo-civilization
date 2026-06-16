@@ -73,6 +73,7 @@ def main():
         "grid": demos.grid_evolution_demo(),
         "social": demos.social_demo(),
         "computer_trace": demos.computer_trace_demo(),
+        "real_os": demos.real_os_demo(),
     }
     print(f"    echo mastery@episode {demos_out['echo']['episodes_to_mastery']}, "
           f"grid {demos_out['grid']['initial_best']:.1f}->"
@@ -98,6 +99,8 @@ def main():
         full_h, ctrl_h, "figures/12_computer_curriculum.png")
     figures["levels"] = viz.plot_computer_levels(
         full_h, "figures/13_computer_levels.png")
+    figures["real_os"] = viz.plot_real_os(
+        demos_out["real_os"], "figures/14_real_os_shell.png")
     print(f"    wrote {len(figures)} figures to figures/")
 
     # 5. report ----------------------------------------------------------

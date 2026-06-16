@@ -64,13 +64,35 @@ generations stand on the shoulders of earlier ones.
 | `report.py` | generates `research_report.md` |
 | `database.py` | SQLite logging of agents, skills, rewards, generations, propagation |
 
-## The five worlds
+## The worlds
 
 0. **Echo World** — reproduce a target string (learn to copy). Tabular Q-learning.
 1. **Transformation World** — echo / reverse / count / shift and their compositions.
 2. **Memory World** — remember a fact, recall after a delay (retention, forgetting, transfer).
 3. **Grid World** — move, collect resources, avoid hazards, survive. Evolved NN policy.
 4. **Social World** — agents agree on meanings of initially meaningless symbols (emergent communication).
+5. **Computer World** *(Exp. E)* — operate a *simulated* VM (virtual filesystem +
+   register) via shell-like ops; an **auto-curriculum** raises difficulty as the
+   population improves. The full civilization climbs from "copy a file" to deep
+   multi-step pipelines (level 1→5) and sustains it; a no-sharing control collapses.
+6. **Real Computer World** *(Exp. F)* — the *same* learned macros execute as
+   **real sandboxed `bash` commands** (`cat`/`grep`/`sort`/`uniq`/`wc`/`tr`/`tac`/`cp`
+   in a temp dir, whitelisted, no network). Cultured agents solve real tasks in a
+   handful of real commands; fresh agents fail within their execution budget —
+   genuine, if bounded, computer-use agents.
+
+## Roadmap (raising the level of abstraction)
+
+Done: worlds 0–6 above. Next: a wider sandboxed shell with **learned command
+arguments** and agent-proposed sub-tasks; then an **Autonomous-operation World** —
+a persistent environment where a guild of specialised agents pursues a long-lived
+open-ended objective (e.g. running a simulated business) via hierarchical goal
+decomposition, delegation, trade and never-terminating evaluation. The
+civilization machinery (skills, culture, teaching, reputation, inheritance,
+specialization) is the substrate; what gets added is hierarchy and an economy.
+This is **not** a claim of AGI — it is a study of cumulative culture as the lever
+for unbounded capability growth, tested at each rung from copying a string to
+operating a real computer.
 
 ## Running
 

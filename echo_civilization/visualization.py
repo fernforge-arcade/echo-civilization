@@ -231,6 +231,36 @@ def plot_computer_levels(full_hist, path):
     return _save(fig, path)
 
 
+def plot_real_os(demo, path):
+    """Experiment F: real sandboxed-shell execution — cost (real commands run) to
+    solve each level, cultured vs fresh, with solved/failed marked."""
+    rows = demo["rows"]
+    levels = [r["level"] for r in rows]
+    cult = [r["cultured_shell_calls"] for r in rows]
+    fresh = [r["fresh_shell_calls"] for r in rows]
+    x = np.arange(len(levels))
+    fig, ax = plt.subplots(figsize=(8.5, 5))
+    b1 = ax.bar(x - 0.2, cult, 0.38, label="cultured agent (inherited macros)",
+                color="#27ae60")
+    b2 = ax.bar(x + 0.2, fresh, 0.38, label="fresh agent (no macros)",
+                color="#c0392b")
+    for r, rect in zip(rows, b1):
+        ax.text(rect.get_x() + rect.get_width() / 2, rect.get_height() + 0.5,
+                "✓" if r["cultured_solved"] else "✗", ha="center", fontsize=9)
+    for r, rect in zip(rows, b2):
+        ax.text(rect.get_x() + rect.get_width() / 2, rect.get_height() + 0.5,
+                "✓" if r["fresh_solved"] else "✗", ha="center", fontsize=9)
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"L{l}\n{r['name']}" for l, r in zip(levels, rows)],
+                       fontsize=7)
+    ax.set_title("Experiment F — real OS shell: cost to solve a task\n"
+                 "(✓ solved, ✗ failed within budget; bar height = real commands run)")
+    ax.set_ylabel("real shell commands executed")
+    ax.grid(alpha=0.3, axis="y")
+    ax.legend(fontsize=8)
+    return _save(fig, path)
+
+
 def plot_grid_evolution(curve, path):
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot([c["avg"] for c in curve], marker="o", ms=3, label="population mean")

@@ -122,6 +122,32 @@ Most reputable computer macros in the final culture:
 | grep_file | read_input→grep→write_output | 3 | 102 | 4.4 |
 | grep_sort_uniq | read_input→grep→sort→append_output | 4 | 65 | 3.4 |
 
+### 3.5 From simulation to a real OS (Experiment F)
+The Computer World above is simulated. To check the skills are *real*, **Real Computer World** maps every primitive op to an actual coreutils command (`cat`, `grep`, `sort`, `uniq`, `wc`, `tr`, `tac`, `cp`) run by `bash` in a throwaway temp sandbox (whitelisted commands, quoted args, minimal env, timeout — no network). An agent's macros transfer **unchanged** from the simulated world to the real shell.
+We compare a *cultured* agent (inherited macros) with a *fresh* agent (empty library, budget 30 real executions) on the same real tasks:
+
+| level | task | cultured solved | cultured shell cmds | fresh solved | fresh shell cmds |
+|---|---|---|---|---|---|
+| 1 | `copy_file` | ✅ | 2 | ✅ | 18 |
+| 2 | `upper_file` | ✅ | 5 | ❌ | 44 |
+| 3 | `grep_count` | ✅ | 23 | ❌ | 44 |
+| 4 | `grep_sort_count` | ✅ | 23 | ❌ | 44 |
+| 5 | `grep_upper_reverse_count` | ✅ | 23 | ❌ | 44 |
+
+The cultured agent solved **5/5** real tasks; the fresh agent solved only **1/5** before exhausting its real-execution budget. Inherited skill makes real computer use cheap; from scratch it is prohibitively expensive — the accumulation thesis holds against a genuine operating system.
+
+A real command trace (level 5, `grep_upper_reverse_count`, keyword *"north"*) the agent actually executed in its sandbox:
+
+```bash
+cat -- tower.txt > ._reg
+grep -F -- north ._reg > ._tmp || true; mv ._tmp ._reg
+grep -c . ._reg > ._tmp || true; mv ._tmp ._reg
+cp ._reg output.txt
+```
+produced `'1'` (expected `'1'`).
+
+![Real OS shell: cost to solve, cultured vs fresh](figures/14_real_os_shell.png)
+
 ## 4. Conclusions
 1. **Knowledge accumulates culturally.** The headline result (supports H1): conditions with skill sharing/inheritance become measurably more capable on hard tasks over generations, while a single agent and a non-sharing population do not. Later generations solve composite and deep tasks that earlier generations, given the same budget, could not — because the building blocks had entered the shared culture.
 2. **The mechanism is recombination of inherited primitives.** Culture turns an exponential blind search into a short composition over already-known skills. This is the computational analogue of "standing on the shoulders of giants".
@@ -143,3 +169,13 @@ Most reputable computer macros in the final culture:
 ./venv/bin/python run_experiments.py
 ```
 All raw data is logged to `results/echo_civilization.db` (SQLite): tables `experiments`, `generations`, `agents`, `skills`, `propagation`, `rewards`. Figures are written to `figures/`.
+
+## 7. Roadmap — toward open-ended, autonomous agents
+The progression deliberately raises the *level of abstraction* at which agents act, while keeping one mechanism constant: cumulative, recombinable, inheritable skill.
+1. **Echo → Transformation → Memory/Grid/Social** *(done)* — primitive learning, memory, evolved control, emergent language.
+2. **Computer World** *(done, Exp. E)* — operate a *simulated* VM; climb an auto-curriculum of multi-step file pipelines.
+3. **Real Computer World** *(done, Exp. F)* — the same skills execute as **real sandboxed shell commands**; agents are literal (bounded) computer-use agents.
+4. **Open shell + learned arguments** *(next)* — widen the primitive set toward a fuller sandboxed shell and learn command *arguments/values*, not just operation order; agents propose and verify their own sub-tasks.
+5. **Autonomous-operation World** *(planned)* — the highest abstraction: a persistent environment where an agent (or guild of specialised agents) pursues a long-lived open-ended objective — e.g. *running a simulated business* — by decomposing goals into sub-goals, delegating to specialists, trading, maintaining state across long horizons, and being selected on sustained outcome rather than single-task success. The civilization machinery already built (skills, culture, teaching, reputation, inheritance, specialization) is the substrate; what is added is hierarchical goal decomposition and an economy with continuous, never-terminating evaluation.
+
+Throughout, the claim is **not** that this is AGI, but that *cultural accumulation is the missing ingredient that lets simple agents keep getting more capable without bound* — and that this same lever operates at each rung from copying a string to operating a real computer.

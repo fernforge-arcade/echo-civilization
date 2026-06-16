@@ -144,3 +144,57 @@ def social_demo(seed: int = 0, n_agents: int = 6, rounds: int = 200,
     world = SocialWorld(rng, n_concepts=n_concepts, n_symbols=n_concepts)
     agents = [Agent(0, rng) for _ in range(n_agents)]
     return world.run(agents, rounds=rounds)
+
+
+def real_os_demo(seed: int = 5, fresh_budget: int = 30):
+    """Genuine sandboxed-shell demonstration (Environment 6 / Experiment F).
+
+    For each curriculum level we compare two agents on REAL tasks executed by bash
+    in a temp sandbox:
+      - a 'cultured' agent that inherited the lower-level macros, and
+      - a 'fresh' agent with an empty library and a bounded real-execution budget.
+    We measure whether each solves the task and how many real shell commands it
+    had to run. Culture should make real computer use cheap; from scratch it is
+    prohibitively expensive. Returns per-level data + one real command trace.
+    """
+    from .environments.computer_world import CURRICULUM, MAX_LEVEL
+    from .environments.real_computer_world import ALLOWED_OPS, RealComputerWorld
+    from .synthesis import synthesize
+
+    rng = np.random.default_rng(seed)
+    world = RealComputerWorld(rng)
+    primitives = sorted(ALLOWED_OPS)
+    rows = []
+    trace = None
+
+    def solve(known_programs, task, budget):
+        calls = {"n": 0}
+        def evaluate(program):
+            ok, score, out, c, log = world.grade(program, task)
+            calls["n"] += c
+            return ok, score
+        res = synthesize(known_programs, primitives, evaluate, budget, rng,
+                         max_depth=3, discovery_sample=60)
+        return res, calls["n"]
+
+    for lvl in range(1, MAX_LEVEL + 1):
+        task = world.make_task(lvl)
+        # cultured agent: inherited macros up to lvl-1 (so it must compose/recall)
+        known = []
+        for L in range(1, lvl + 1):
+            for nm, prog in CURRICULUM[L]:
+                known.append(prog)
+        cres, ccalls = solve(known, task, budget=60)
+        fres, fcalls = solve([], task, budget=fresh_budget)
+        if lvl == MAX_LEVEL and trace is None:
+            ok, score, out, c, log = world.grade(cres.program, task)
+            trace = {"level": lvl, "name": task.name, "keyword": task.keyword,
+                     "input_file": task.input_file, "commands": log,
+                     "output": out, "expected": task.expected_output}
+        rows.append({
+            "level": lvl, "name": task.name,
+            "cultured_solved": cres.solved, "cultured_shell_calls": ccalls,
+            "fresh_solved": fres.solved, "fresh_shell_calls": fcalls,
+        })
+        task.cleanup()
+    return {"rows": rows, "trace": trace, "fresh_budget": fresh_budget}

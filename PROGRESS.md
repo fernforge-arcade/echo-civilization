@@ -100,9 +100,18 @@ inherited, and **modified** (insert one op) to build the next macro.
 
 ## OPERATOR ROADMAP (requested mid-run, build in this order)
 1. [DONE] simulated Computer World (above).
-2. [IN PROGRESS] REAL-OS world: agents execute ACTUAL sandboxed shell commands
-   (whitelisted, inside a temp dir, no network) as genuine computer-use agents.
-   File: environments/real_computer_world.py + experiment F.
+2. [DONE] REAL-OS world (Experiment F): agents execute ACTUAL sandboxed shell
+   commands (coreutils whitelist, temp dir, quoted args, minimal env, timeout, no
+   network). File: environments/real_computer_world.py; demo real_os_demo() in
+   demos.py; figure 14; report section 3.5. Inherited macros transfer UNCHANGED
+   from sim to real shell. Result: cultured agent solves 5/5 real tasks in few
+   real commands; fresh agent solves 1/5 within budget. Real subprocess is slow so
+   this is a validation/demo layer, NOT full evolution.
 3. [ROADMAP/doc] highest-abstraction world: agents autonomously run a long-lived
    task/"business" forever (hierarchical goals, sub-task decomposition, economy).
-   Document as staged next step; prototype if time allows.
+   Documented in report section 7 + README roadmap. NOT yet built — next session.
+
+## Current artifact counts
+14 figures (01-14), report sections 1-7, experiments A/B/C/D/E/F. Full run ~44s
+via `./venv/bin/python run_experiments.py`. Git: 2 commits so far (foundation,
+Exp E); commit Exp F next.
