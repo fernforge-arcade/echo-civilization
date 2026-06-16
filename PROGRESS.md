@@ -123,6 +123,21 @@ inherited, and **modified** (insert one op) to build the next macro.
 via `./venv/bin/python run_experiments.py`. Git commits: foundation, Exp E, Exp F,
 Exp G. `--quick` and `--ent-days N` flags supported.
 
+## RESUME #3 (2026-06-16): ran it + wrote the flagship report
+- Re-ran full pipeline fresh (seed 0, ~75s): all 8 experiments, 15 figures, DB
+  (33,360 reward rows, 6,510 agent rows, 2,273 skill rows).
+- Authored REPORT.md (533 lines) — the human-quality flagship write-up with every
+  figure embedded, real worked examples/traces, and stats pulled from the DB.
+- IMPORTANT FS GOTCHA: workspace is a CASE-INSENSITIVE Windows bind-mount, so
+  RESEARCH_REPORT.md and research_report.md are THE SAME FILE. The flagship is
+  named REPORT.md (distinct) so run_experiments.py (which writes research_report.md)
+  never clobbers it. Don't create a file whose lowercased name collides.
+- git: also needed `git config --global --add safe.directory /home/node/workspace`
+  again (root-owned repo). Commit 57445e3 added REPORT.md + README pointer.
+- Key fresh numbers: A 59->57%, B 44->50%, C 44->97%, D 49->96%; mean training
+  reward A/B 0.77 vs C/D 0.96; computer civ frontier 1->5 (reward 0.96) vs
+  no-share collapse (reward 0.16); firm +426 vs -92.
+
 ## NEXT SESSION (operator roadmap remaining)
 - Real OS world #2 deepening: wider sandboxed shell + LEARNED ARGUMENTS (agents
   currently synthesise op ORDER only; args auto-bind from task ctx). Let agents
