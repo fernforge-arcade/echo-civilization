@@ -110,9 +110,14 @@ python3 -m venv venv
 ```
 
 Outputs:
-- `research_report.md` — hypothesis, methods, results, conclusions, failures.
-- `figures/` — 11 PNGs (the 5 required graphs + supporting plots).
-- `results/echo_civilization.db` — all raw data (SQLite).
+- **[`REPORT.md`](REPORT.md)** — the flagship research write-up: hypothesis,
+  methods, all worlds with worked examples, results & statistics, every figure
+  embedded, conclusions, and limitations. **Start here.**
+- `research_report.md` — the machine-generated companion, auto-written each run.
+- `figures/` — 15 PNGs (the 5 required graphs + supporting plots, including the
+  computer-curriculum, real-OS, and autonomous-firm figures).
+- `results/echo_civilization.db` — all raw data (SQLite): experiments, generations,
+  agents, skills, propagation, rewards.
 
 ## Design principle
 
