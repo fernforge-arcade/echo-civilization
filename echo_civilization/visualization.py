@@ -231,6 +231,34 @@ def plot_computer_levels(full_hist, path):
     return _save(fig, path)
 
 
+def plot_enterprise(full_hist, control_hist, path):
+    """Experiment G: autonomous firm — cumulative profit and rising order
+    sophistication over a long, never-terminating run, with vs without a shared
+    knowledge base."""
+    fig, ax = plt.subplots(figsize=(8.5, 5))
+    days_f = [h["day"] for h in full_hist]
+    days_c = [h["day"] for h in control_hist]
+    ax.plot(days_f, [h["cum_profit"] for h in full_hist], color="#16a085", lw=2,
+            label="firm WITH shared knowledge base")
+    ax.plot(days_c, [h["cum_profit"] for h in control_hist], color="#c0392b", lw=2,
+            label="firm WITHOUT knowledge base (control)")
+    ax.set_xlabel("business day (continuous operation)")
+    ax.set_ylabel("cumulative profit")
+    ax.grid(alpha=0.3)
+    ax2 = ax.twinx()
+    ax2.step(days_f, [h["max_order_level"] for h in full_hist], color="#16a085",
+             ls=":", alpha=0.7, where="post",
+             label="firm ambition: hardest order level sold")
+    ax2.set_ylabel("order sophistication level (1–5)")
+    ax2.set_ylim(0, full_hist[0].get("max_level_done", 5) and 5.5)
+    ax.set_title("Experiment G — autonomous firm running forever\n"
+                 "(institutional knowledge compounds into profit & sophistication)")
+    lines1, labels1 = ax.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax.legend(lines1 + lines2, labels1 + labels2, fontsize=8, loc="upper left")
+    return _save(fig, path)
+
+
 def plot_real_os(demo, path):
     """Experiment F: real sandboxed-shell execution — cost (real commands run) to
     solve each level, cultured vs fresh, with solved/failed marked."""

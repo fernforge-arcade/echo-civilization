@@ -17,6 +17,7 @@ import time
 
 from echo_civilization import demos, visualization as viz
 from echo_civilization.computer_evolution import run_computer_experiments
+from echo_civilization.enterprise import run_enterprise_experiments
 from echo_civilization.database import Database
 from echo_civilization.evaluation import run_all_experiments
 from echo_civilization.report import generate_report
@@ -29,13 +30,15 @@ def main():
     ap.add_argument("--budget", type=int, default=35)
     ap.add_argument("--tasks-per-agent", type=int, default=8)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--ent-days", type=int, default=120,
+                    help="business days for the Autonomous Operation World (Exp G)")
     ap.add_argument("--db", default="results/echo_civilization.db")
     ap.add_argument("--quick", action="store_true",
                     help="small/fast run for smoke-testing")
     args = ap.parse_args()
 
     if args.quick:
-        args.generations, args.population = 12, 14
+        args.generations, args.population, args.ent_days = 12, 14, 40
 
     t0 = time.time()
     print("=" * 70)
@@ -64,6 +67,15 @@ def main():
           f"{full_h[-1]['frontier']}/{full_h[-1]['max_level']}  "
           f"(macros={comp['full'].culture.size()}); "
           f"control stalls at mastered={ctrl_h[-1]['mastered_level']}")
+
+    # 2b. Autonomous Operation World (Experiment G) ----------------------
+    print("    running Autonomous Operation World (Experiment G) ...")
+    ent = run_enterprise_experiments(db=db, days=args.ent_days,
+                                     n_agents=12, seed=args.seed)
+    ent_f, ent_c = ent["full"].history, ent["control"].history
+    print(f"    firm cumulative profit: with-KB {ent_f[-1]['cum_profit']:.0f} "
+          f"vs control {ent_c[-1]['cum_profit']:.0f}; "
+          f"ambition reached level {ent_f[-1]['max_order_level']}")
 
     # 3. subsystem demos -------------------------------------------------
     print("\n[3/5] Running subsystem demos (Echo / Memory / Grid / Social) ...")
@@ -101,12 +113,14 @@ def main():
         full_h, "figures/13_computer_levels.png")
     figures["real_os"] = viz.plot_real_os(
         demos_out["real_os"], "figures/14_real_os_shell.png")
+    figures["enterprise"] = viz.plot_enterprise(
+        ent_f, ent_c, "figures/15_autonomous_firm.png")
     print(f"    wrote {len(figures)} figures to figures/")
 
     # 5. report ----------------------------------------------------------
     print("\n[5/5] Generating research_report.md ...")
     path = generate_report(results, demos_out, figures, "research_report.md",
-                           computer=comp)
+                           computer=comp, enterprise=ent)
     db.close()
 
     print(f"\nDone in {time.time() - t0:.1f}s.")

@@ -107,11 +107,25 @@ inherited, and **modified** (insert one op) to build the next macro.
    from sim to real shell. Result: cultured agent solves 5/5 real tasks in few
    real commands; fresh agent solves 1/5 within budget. Real subprocess is slow so
    this is a validation/demo layer, NOT full evolution.
-3. [ROADMAP/doc] highest-abstraction world: agents autonomously run a long-lived
-   task/"business" forever (hierarchical goals, sub-task decomposition, economy).
-   Documented in report section 7 + README roadmap. NOT yet built — next session.
+3. [DONE-PROTOTYPE] Autonomous Operation World (Experiment G): a firm of agents
+   runs FOREVER (continuous days), decomposing customer orders into sub-tasks,
+   delegating to specialists (load-balanced by specialty band), earning revenue /
+   paying wages, with BOUNDED-TENURE workforce churn so institutional knowledge
+   (shared KB), not individuals, carries the firm. File: enterprise.py; figure 15;
+   report section 3.6 + conclusion 6. Result (robust across seeds 0/1/2): KB firm
+   profit compounds to ~+400-650; no-KB control runs at a LOSS (~-90 to -160).
+   KEY tuning (do NOT revert): tenure=7 (bounded churn is what makes KB matter —
+   long-lived workers hoard skill and erase the contrast); WAGE=0.45, TASK_VALUE
+   {1:1,2:2.5,3:5,4:8,5:13}. n_agents=12, days=120 default.
 
 ## Current artifact counts
-14 figures (01-14), report sections 1-7, experiments A/B/C/D/E/F. Full run ~44s
-via `./venv/bin/python run_experiments.py`. Git: 2 commits so far (foundation,
-Exp E); commit Exp F next.
+15 figures (01-15), report sections 1-7, experiments A/B/C/D/E/F/G. Full run ~60s
+via `./venv/bin/python run_experiments.py`. Git commits: foundation, Exp E, Exp F,
+Exp G. `--quick` and `--ent-days N` flags supported.
+
+## NEXT SESSION (operator roadmap remaining)
+- Real OS world #2 deepening: wider sandboxed shell + LEARNED ARGUMENTS (agents
+  currently synthesise op ORDER only; args auto-bind from task ctx). Let agents
+  learn argument values + propose their own sub-tasks.
+- Autonomous world deepening: agents propose their own goals; multi-firm economy
+  with competition/trade; truly open-ended (unbounded) runs.

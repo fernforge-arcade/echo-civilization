@@ -148,12 +148,25 @@ produced `'1'` (expected `'1'`).
 
 ![Real OS shell: cost to solve, cultured vs fresh](figures/14_real_os_shell.png)
 
+### 3.6 Running an operation autonomously, forever (Experiment G)
+The final and highest-abstraction world asks not *"can an agent solve a task?"* but *"can a population sustain a long-lived enterprise?"*. A firm of 12 specialised agents runs for 120 business days (a continuous, never-terminating loop). Each day a customer **order** arrives as a bundle of sub-tasks at a spread of difficulty; a manager **decomposes** it and **delegates** each sub-task to the best-suited specialist (load-balanced). Fulfilled work earns **revenue**, wages are a **cost**, the **treasury** compounds, and every few days the **weakest workers are replaced** by new hires — who inherit only the firm's shared **knowledge base**, not the departed workers' private skill. As the firm succeeds, its **ambition** (the hardest order level it sells) ratchets up.
+
+| Firm | final cumulative profit | final order ambition | final fulfil rate | knowledge base |
+|---|---|---|---|---|
+| **With shared knowledge base** | **426** | level 5 | 33% | 8 procedures |
+| Without knowledge base (control) | -92 | level 5 | 33% | 0 |
+
+Both firms churn the same workforce, but only the knowledge-bearing firm turns departing expertise into **institutional memory** that new hires inherit. It ends roughly **inf× more profitable** and its profit slope stays steep while the control's flattens. This is the cumulative-culture thesis at the organisational scale: an autonomous operation keeps compounding only if knowledge outlives the individuals who discovered it. Emergent division of labour is visible too — agents settle into per-difficulty specialties and orders are routed to them.
+
+![Autonomous firm: profit & sophistication over time](figures/15_autonomous_firm.png)
+
 ## 4. Conclusions
 1. **Knowledge accumulates culturally.** The headline result (supports H1): conditions with skill sharing/inheritance become measurably more capable on hard tasks over generations, while a single agent and a non-sharing population do not. Later generations solve composite and deep tasks that earlier generations, given the same budget, could not — because the building blocks had entered the shared culture.
 2. **The mechanism is recombination of inherited primitives.** Culture turns an exponential blind search into a short composition over already-known skills. This is the computational analogue of "standing on the shoulders of giants".
 3. **Vertical inheritance does most of the work; horizontal teaching adds less.** Condition C (inheritance only) and condition D (inheritance + teaching + reputation) finish close together (97% vs 96%), indicating that once skills are inherited and pooled in culture, extra horizontal copying is largely redundant in this task family.
 4. **All subsystems function independently:** individual RL (Echo), memory and its decay/transfer (Memory), evolved neural control (Grid), and emergent communication (Social).
 5. **Agents evolve to match increasingly sophisticated tasks — but only with culture.** In the Computer World, an auto-curriculum raised task difficulty as the population improved. The full civilization climbed the ladder from level 1 to level 5/5 (multi-step VM pipelines) and sustained it, whereas an identical population without sharing collapsed to mastered-level 0 once tasks exceeded what one lifetime can discover. The same accumulation principle thus extends from toy string tasks to **open-ended, tool-using computer tasks** — the direction of genuinely more capable agents.
+6. **Culture compounds into autonomous, never-terminating operation.** In the Autonomous Operation World a firm of specialised agents ran for 120 business days, decomposing a continuous stream of orders, delegating to specialists, and churning its workforce. With a shared knowledge base it reached cumulative profit 426 and sustained order sophistication level 5; an identical firm *without* institutional memory made only -92 and decelerated, because each departing worker took its private skill with it. Institutional knowledge — culture at the organisational scale — is what lets the operation keep compounding.
 
 ## 5. Failures, limitations & threats to validity
 - **Task domain is narrow.** All accumulation experiments use string transforms. The accumulation result should be replicated in richer domains before being generalised.
@@ -176,6 +189,6 @@ The progression deliberately raises the *level of abstraction* at which agents a
 2. **Computer World** *(done, Exp. E)* — operate a *simulated* VM; climb an auto-curriculum of multi-step file pipelines.
 3. **Real Computer World** *(done, Exp. F)* — the same skills execute as **real sandboxed shell commands**; agents are literal (bounded) computer-use agents.
 4. **Open shell + learned arguments** *(next)* — widen the primitive set toward a fuller sandboxed shell and learn command *arguments/values*, not just operation order; agents propose and verify their own sub-tasks.
-5. **Autonomous-operation World** *(planned)* — the highest abstraction: a persistent environment where an agent (or guild of specialised agents) pursues a long-lived open-ended objective — e.g. *running a simulated business* — by decomposing goals into sub-goals, delegating to specialists, trading, maintaining state across long horizons, and being selected on sustained outcome rather than single-task success. The civilization machinery already built (skills, culture, teaching, reputation, inheritance, specialization) is the substrate; what is added is hierarchical goal decomposition and an economy with continuous, never-terminating evaluation.
+5. **Autonomous-operation World** *(prototype done, Exp. G)* — the highest abstraction: a persistent firm of specialised agents pursues a long-lived open-ended objective (*running a business*) by decomposing orders into sub-goals, delegating to specialists, churning its workforce, and being selected on sustained profit rather than single-task success. Next steps here: agents that *propose their own goals*, richer multi-firm economies with competition and trade, and longer horizons (truly open-ended runs).
 
 Throughout, the claim is **not** that this is AGI, but that *cultural accumulation is the missing ingredient that lets simple agents keep getting more capable without bound* — and that this same lever operates at each rung from copying a string to operating a real computer.

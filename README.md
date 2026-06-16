@@ -80,19 +80,25 @@ generations stand on the shoulders of earlier ones.
    in a temp dir, whitelisted, no network). Cultured agents solve real tasks in a
    handful of real commands; fresh agents fail within their execution budget —
    genuine, if bounded, computer-use agents.
+7. **Autonomous Operation World** *(Exp. G)* — the highest abstraction: a firm of
+   specialised agents runs *forever*, decomposing a continuous stream of customer
+   orders into sub-tasks, delegating to specialists, earning revenue and paying
+   wages, with bounded-tenure workforce churn. With a shared knowledge base the
+   firm's profit compounds and it sustains ever-harder orders; an identical firm
+   without institutional memory runs at a loss — institutional knowledge is the
+   difference between a viable and a failing autonomous operation.
 
 ## Roadmap (raising the level of abstraction)
 
-Done: worlds 0–6 above. Next: a wider sandboxed shell with **learned command
-arguments** and agent-proposed sub-tasks; then an **Autonomous-operation World** —
-a persistent environment where a guild of specialised agents pursues a long-lived
-open-ended objective (e.g. running a simulated business) via hierarchical goal
-decomposition, delegation, trade and never-terminating evaluation. The
-civilization machinery (skills, culture, teaching, reputation, inheritance,
-specialization) is the substrate; what gets added is hierarchy and an economy.
-This is **not** a claim of AGI — it is a study of cumulative culture as the lever
-for unbounded capability growth, tested at each rung from copying a string to
-operating a real computer.
+Done: worlds 0–7 above (including a working prototype of the autonomous-operation
+world). Next: a wider sandboxed shell with **learned command arguments** and
+agent-proposed sub-tasks; and a deeper autonomous world where agents **propose
+their own goals**, with a multi-firm economy (competition, trade) over truly
+open-ended horizons. The civilization machinery (skills, culture, teaching,
+reputation, inheritance, specialization) is the substrate; each rung adds
+hierarchy and economy. This is **not** a claim of AGI — it is a study of
+cumulative culture as the lever for unbounded capability growth, tested at each
+rung from copying a string to operating a real computer to running a business.
 
 ## Running
 

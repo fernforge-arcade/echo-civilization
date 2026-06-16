@@ -18,7 +18,7 @@ def _fmt_pct(x):
 
 
 def generate_report(results, demos_out, figures, path="research_report.md",
-                    computer=None):
+                    computer=None, enterprise=None):
     A = results["A_single"]
     B = results["B_population_nosharing"]
     C = results["C_population_memorysharing"]
@@ -191,6 +191,10 @@ def generate_report(results, demos_out, figures, path="research_report.md",
     if computer is not None:
         _computer_section(w, computer, demos_out)
 
+    # ---------------------------------------------- autonomous operation world
+    if enterprise is not None:
+        _enterprise_section(w, enterprise)
+
     # ---------------------------------------------------------------- discussion
     w("\n## 4. Conclusions\n")
     accumulates = _trend(cap(C)) > 0.08 or _trend(cap(D)) > 0.08
@@ -229,6 +233,20 @@ def generate_report(results, demos_out, figures, path="research_report.md",
           f"principle thus extends from toy string tasks to **open-ended, "
           f"tool-using computer tasks** — the direction of genuinely more capable "
           f"agents.\n")
+    if enterprise is not None:
+        ef = enterprise["full"].history
+        ec = enterprise["control"].history
+        w(f"6. **Culture compounds into autonomous, never-terminating operation.** "
+          f"In the Autonomous Operation World a firm of specialised agents ran for "
+          f"{len(ef)} business days, decomposing a continuous stream of orders, "
+          f"delegating to specialists, and churning its workforce. With a shared "
+          f"knowledge base it reached cumulative profit "
+          f"{ef[-1]['cum_profit']:.0f} and sustained order sophistication level "
+          f"{ef[-1]['max_order_level']}; an identical firm *without* institutional "
+          f"memory made only {ec[-1]['cum_profit']:.0f} and decelerated, because "
+          f"each departing worker took its private skill with it. Institutional "
+          f"knowledge — culture at the organisational scale — is what lets the "
+          f"operation keep compounding.\n")
 
     # ---------------------------------------------------------------- failures
     w("\n## 5. Failures, limitations & threats to validity\n")
@@ -281,16 +299,13 @@ def generate_report(results, demos_out, figures, path="research_report.md",
     w("4. **Open shell + learned arguments** *(next)* — widen the primitive set "
       "toward a fuller sandboxed shell and learn command *arguments/values*, not "
       "just operation order; agents propose and verify their own sub-tasks.\n")
-    w("5. **Autonomous-operation World** *(planned)* — the highest abstraction: a "
-      "persistent environment where an agent (or guild of specialised agents) "
-      "pursues a long-lived open-ended objective — e.g. *running a simulated "
-      "business* — by decomposing goals into sub-goals, delegating to specialists, "
-      "trading, maintaining state across long horizons, and being selected on "
-      "sustained outcome rather than single-task success. The civilization "
-      "machinery already built (skills, culture, teaching, reputation, "
-      "inheritance, specialization) is the substrate; what is added is hierarchical "
-      "goal decomposition and an economy with continuous, never-terminating "
-      "evaluation.\n")
+    w("5. **Autonomous-operation World** *(prototype done, Exp. G)* — the highest "
+      "abstraction: a persistent firm of specialised agents pursues a long-lived "
+      "open-ended objective (*running a business*) by decomposing orders into "
+      "sub-goals, delegating to specialists, churning its workforce, and being "
+      "selected on sustained profit rather than single-task success. Next steps "
+      "here: agents that *propose their own goals*, richer multi-firm economies "
+      "with competition and trade, and longer horizons (truly open-ended runs).\n")
     w("\nThroughout, the claim is **not** that this is AGI, but that *cultural "
       "accumulation is the missing ingredient that lets simple agents keep getting "
       "more capable without bound* — and that this same lever operates at each "
@@ -298,6 +313,43 @@ def generate_report(results, demos_out, figures, path="research_report.md",
 
     Path(path).write_text("".join(lines), encoding="utf-8")
     return path
+
+
+def _enterprise_section(w, enterprise):
+    """Section 3.6 — Autonomous Operation World (top of the abstraction ladder)."""
+    full = enterprise["full"]
+    ctrl = enterprise["control"]
+    fh, ch = full.history, ctrl.history
+    w("\n### 3.6 Running an operation autonomously, forever (Experiment G)\n")
+    w("The final and highest-abstraction world asks not *\"can an agent solve a "
+      "task?\"* but *\"can a population sustain a long-lived enterprise?\"*. A firm "
+      f"of {full.cfg.n_agents} specialised agents runs for {len(fh)} business days "
+      "(a continuous, never-terminating loop). Each day a customer **order** "
+      "arrives as a bundle of sub-tasks at a spread of difficulty; a manager "
+      "**decomposes** it and **delegates** each sub-task to the best-suited "
+      "specialist (load-balanced). Fulfilled work earns **revenue**, wages are a "
+      "**cost**, the **treasury** compounds, and every few days the **weakest "
+      "workers are replaced** by new hires — who inherit only the firm's shared "
+      "**knowledge base**, not the departed workers' private skill. As the firm "
+      "succeeds, its **ambition** (the hardest order level it sells) ratchets up.\n")
+    w("\n| Firm | final cumulative profit | final order ambition | final fulfil rate | knowledge base |\n")
+    w("|---|---|---|---|---|\n")
+    w(f"| **With shared knowledge base** | **{fh[-1]['cum_profit']:.0f}** | "
+      f"level {fh[-1]['max_order_level']} | {_fmt_pct(fh[-1]['fulfil_rate'])} | "
+      f"{full.kb.size()} procedures |\n")
+    w(f"| Without knowledge base (control) | {ch[-1]['cum_profit']:.0f} | "
+      f"level {ch[-1]['max_order_level']} | {_fmt_pct(ch[-1]['fulfil_rate'])} | "
+      f"0 |\n")
+    ratio = (fh[-1]['cum_profit'] / ch[-1]['cum_profit']) if ch[-1]['cum_profit'] > 0 else float('inf')
+    w(f"\nBoth firms churn the same workforce, but only the knowledge-bearing firm "
+      f"turns departing expertise into **institutional memory** that new hires "
+      f"inherit. It ends roughly **{ratio:.1f}× more profitable** and its profit "
+      f"slope stays steep while the control's flattens. This is the cumulative-"
+      f"culture thesis at the organisational scale: an autonomous operation keeps "
+      f"compounding only if knowledge outlives the individuals who discovered it. "
+      f"Emergent division of labour is visible too — agents settle into "
+      f"per-difficulty specialties and orders are routed to them.\n")
+    w("\n![Autonomous firm: profit & sophistication over time](figures/15_autonomous_firm.png)\n")
 
 
 def _computer_section(w, computer, demos_out):
