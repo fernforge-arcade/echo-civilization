@@ -114,11 +114,15 @@ Outputs:
 - **[`REPORT.md`](REPORT.md)** — the flagship research write-up: hypothesis,
   methods, all worlds with worked examples, results & statistics, every figure
   embedded, conclusions, and limitations. **Start here.**
-- **[`GENERALIZATION_REPORT.md`](GENERALIZATION_REPORT.md)** — the falsification
-  test: train on a subset of composites, test on *disjoint, never-trained*
-  composites stratified by depth. Confirms the headline is **real compositional
-  generalization** (culture +0.49 on novel depth-3 tasks), not memorization —
-  with oracle checks, behavioural leak checks, and frozen multi-seed eval.
+- **[`GENERALIZATION_FINDINGS.md`](GENERALIZATION_FINDINGS.md)** — the flagship
+  write-up of the falsification test: train on a subset of composites, test on
+  *disjoint, never-trained* composites stratified by depth. Full methodology, the
+  train/test split, a worked example, multi-seed results, both figures, and the
+  verdict. Confirms the headline is **real compositional generalization**
+  (culture +0.49 on novel depth-3 tasks), not memorization. **Read this for the
+  new result.**
+- `GENERALIZATION_REPORT.md` — the terse machine-generated companion (auto-written
+  by `run_generalization.py`).
 - `research_report.md` — the machine-generated companion, auto-written each run.
 - `figures/` — 17 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, and
   the generalization-by-depth bars + accumulation curve).

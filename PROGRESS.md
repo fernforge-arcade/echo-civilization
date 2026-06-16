@@ -173,3 +173,17 @@ Outputs: GENERALIZATION_REPORT.md, results/generalization.json, figures/16,17.
 REPORT.md gained section 4.4; README + run command added.
 
 Reproduce: ./venv/bin/python run_generalization.py --seeds 0 1 2   (~45s)
+
+## RESUME #5 (2026-06-16): wrote up the generalization study
+Operator asked to "write up another report with the new stuff." Authored
+GENERALIZATION_FINDINGS.md — the polished, human-quality flagship report of the
+compositional-generalization experiment (companion to the terse auto-generated
+GENERALIZATION_REPORT.md). Includes: why the headline needed the test, the split
+design (14 train-2 / 15 held-2 / 24 held-3), why depth-3 is decisive, the
+methodology guards table, a concrete worked trace (novel `inc2 then reverse then
+inc1` solved by composing primitive inc2 + inherited abstraction `reverse then
+inc1`), the multi-seed results table, both figures (16/17) with captions, the
+gen-0->emergence curve narrative, the verdict (Outcome 1), the single depth-2
+leak handled honestly, caveats, reproduce steps. README updated to point at it.
+Numbers verbatim from results/generalization.json (depth-3: A .13/B .06/C .60/
+D .62; sep +0.49; depth-3 leaks NONE; oracle 100%). No code changed this resume.
