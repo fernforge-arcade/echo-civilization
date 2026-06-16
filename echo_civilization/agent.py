@@ -43,7 +43,8 @@ class Agent:
         # internal state
         self.short_term = ShortTermMemory(capacity=8)
         self.long_term = LongTermMemory()
-        self.known_skills: dict[tuple, Skill] = {}   # program -> Skill
+        self.known_skills: dict[tuple, Skill] = {}   # string-domain program -> Skill
+        self.computer_skills: dict[tuple, Skill] = {}  # computer-domain macro -> Skill
         self.preferences = {
             "exploration": float(rng.uniform(0.1, 0.5)),   # search appetite
             "imitation": float(rng.uniform(0.3, 0.9)),     # tendency to adopt culture
@@ -73,6 +74,59 @@ class Agent:
 
     def known_programs(self):
         return list(self.known_skills.keys())
+
+    # ----------------------------------------------------- computer domain
+    def learn_computer_skill(self, skill: Skill) -> bool:
+        if skill.key() in self.computer_skills:
+            return False
+        self.computer_skills[skill.key()] = skill
+        return True
+
+    def _priority_computer_programs(self):
+        progs = sorted(self.computer_skills.values(),
+                       key=lambda s: (-s.reputation, s.complexity()))
+        return [s.program for s in progs]
+
+    def solve_computer_task(self, task, budget: int = 80, generation: int = 0,
+                            allow_discovery: bool = True):
+        """Operate the simulated computer to satisfy a task's goal.
+
+        Reuses the domain-agnostic staged synthesiser: recall known macros,
+        recombine them, then (optionally) discover from scratch. A newly solved
+        program is abstracted into a reusable macro skill. Returns the SynthResult.
+        """
+        from .environments.computer_world import (COMPUTER_PRIMITIVES,
+                                                   run_computer_program)
+        from .synthesis import synthesize
+
+        def evaluate(program):
+            final = run_computer_program(program, task.machine, task.ctx)
+            return task.grade(final)
+
+        known = self._priority_computer_programs()
+        primitives = list(COMPUTER_PRIMITIVES.keys())
+        res = synthesize(
+            known, primitives, evaluate, budget, self.rng,
+            max_depth=(2 if not allow_discovery else 4))
+        # abstract a freshly solved program into a macro skill
+        disc = None
+        if res.solved and res.program and (res.discovered or res.via_composition):
+            disc = self._abstract_computer_skill(res.program, task, generation,
+                                                  derived=res.via_composition)
+        elif res.solved and res.program and res.program not in self.computer_skills:
+            disc = self._abstract_computer_skill(res.program, task, generation)
+        return res, disc
+
+    def _abstract_computer_skill(self, program, task, generation, derived=False):
+        from .skills import Skill, program_name
+        skill = Skill(
+            name=task.name if task.name else program_name(program),
+            program=tuple(program), creator=self.id, generation=generation,
+            preconditions=list(dict.fromkeys(program)) if derived else [],
+            examples=[(task.ctx.input_file, task.expected_output[:24])],
+        )
+        self.learn_computer_skill(skill)
+        return skill
 
     # --------------------------------------------------------------- solving
     def solve_task(self, examples, query_input, budget: int = 60,

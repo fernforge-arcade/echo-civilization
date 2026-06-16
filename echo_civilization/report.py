@@ -17,7 +17,8 @@ def _fmt_pct(x):
     return f"{100 * x:.0f}%"
 
 
-def generate_report(results, demos_out, figures, path="research_report.md"):
+def generate_report(results, demos_out, figures, path="research_report.md",
+                    computer=None):
     A = results["A_single"]
     B = results["B_population_nosharing"]
     C = results["C_population_memorysharing"]
@@ -186,6 +187,10 @@ def generate_report(results, demos_out, figures, path="research_report.md"):
     w("\n![Per-difficulty solve rate (condition D)](figures/11_difficulty_breakdown.png)\n")
     w("![Best-agent fitness](figures/02_best_performance.png)\n")
 
+    # ---------------------------------------------- computer world / curriculum
+    if computer is not None:
+        _computer_section(w, computer, demos_out)
+
     # ---------------------------------------------------------------- discussion
     w("\n## 4. Conclusions\n")
     accumulates = _trend(cap(C)) > 0.08 or _trend(cap(D)) > 0.08
@@ -210,6 +215,20 @@ def generate_report(results, demos_out, figures, path="research_report.md"):
     w("4. **All subsystems function independently:** individual RL (Echo), memory "
       "and its decay/transfer (Memory), evolved neural control (Grid), and emergent "
       "communication (Social).\n")
+    if computer is not None:
+        full_h = computer["full"].history
+        ctrl_h = computer["control"].history
+        w(f"5. **Agents evolve to match increasingly sophisticated tasks — but only "
+          f"with culture.** In the Computer World, an auto-curriculum raised task "
+          f"difficulty as the population improved. The full civilization climbed "
+          f"the ladder from level {full_h[0]['frontier']} to level "
+          f"{full_h[-1]['frontier']}/{full_h[-1]['max_level']} (multi-step VM "
+          f"pipelines) and sustained it, whereas an identical population without "
+          f"sharing collapsed to mastered-level {ctrl_h[-1]['mastered_level']} once "
+          f"tasks exceeded what one lifetime can discover. The same accumulation "
+          f"principle thus extends from toy string tasks to **open-ended, "
+          f"tool-using computer tasks** — the direction of genuinely more capable "
+          f"agents.\n")
 
     # ---------------------------------------------------------------- failures
     w("\n## 5. Failures, limitations & threats to validity\n")
@@ -230,6 +249,16 @@ def generate_report(results, demos_out, figures, path="research_report.md"):
       "to avoid this but the failure mode exists.\n")
     w("- **No statistical multi-seed confidence intervals** are reported in this "
       "single run; `run_experiments.py --seeds N` can be extended for that.\n")
+    w("- **This is not AGI, and does not claim to be.** The Computer World is a "
+      "*simulated* VM with a fixed primitive instruction set; agents synthesise "
+      "programs over those primitives, they do not learn to operate a real "
+      "operating system, write free-form code, or set their own goals. What the "
+      "experiment demonstrates is the *mechanism* argued to be necessary for "
+      "open-ended capability growth — cumulative, recombinable, inheritable "
+      "skill — operating in a tool-use domain. Scaling the primitive set toward a "
+      "real sandboxed shell, learning argument values (not just op order), and "
+      "letting agents propose their own tasks are the concrete next steps toward "
+      "more general competence.\n")
 
     w("\n## 6. Reproduction\n")
     w("```\n./venv/bin/python run_experiments.py\n```\n")
@@ -239,3 +268,67 @@ def generate_report(results, demos_out, figures, path="research_report.md"):
 
     Path(path).write_text("".join(lines), encoding="utf-8")
     return path
+
+
+def _computer_section(w, computer, demos_out):
+    """Section 3.4 — Computer World auto-curriculum (the capability-scaling result)."""
+    full = computer["full"]
+    ctrl = computer["control"]
+    fh, ch = full.history, ctrl.history
+    w("\n### 3.4 Scaling up: learning to operate a computer (auto-curriculum)\n")
+    w("To test whether the same accumulation principle can push agents toward "
+      "*genuinely more sophisticated* behaviour, we added **Computer World** — a "
+      "simulated VM with a virtual filesystem and a working register that agents "
+      "operate via shell-like commands (`read_input`, `find`, `grep`, `sort`, "
+      "`uniq`, `count_lines`, `write_output`, …). A solution is a multi-step "
+      "*program*; learned programs become reusable **macros** that are shared, "
+      "taught and inherited like any other skill, and can be **modified** "
+      "(inserting one operation) to build the next, harder macro.\n")
+    w("An **auto-curriculum** raises the offered task level whenever the population "
+      f"masters the current one (≥{int(100*full.cfg.advance_threshold)}% solve "
+      f"rate), from level 1 (*copy a file*) up to level {fh[-1]['max_level']} "
+      f"(*locate → filter → sort → de-duplicate → count → write*). The headline "
+      f"metric is **how far up this open-ended ladder each civilization climbs**.\n")
+    w("\n| Condition | start frontier | final frontier | final mastered level | "
+      "macros in culture | teaching transfers |\n")
+    w("|---|---|---|---|---|---|\n")
+    w(f"| Full civilization (culture+inheritance+teaching) | {fh[0]['frontier']} | "
+      f"**{fh[-1]['frontier']}/{fh[-1]['max_level']}** | {fh[-1]['mastered_level']} | "
+      f"{full.culture.size()} | {fh[-1]['n_propagation_events']} |\n")
+    w(f"| No-sharing control (identical otherwise) | {ch[0]['frontier']} | "
+      f"{ch[-1]['frontier']}/{ch[-1]['max_level']} | "
+      f"**{ch[-1]['mastered_level']}** | {ctrl.culture.size()} | 0 |\n")
+    first_top = next((h["generation"] for h in fh
+                      if h["frontier"] >= fh[-1]["max_level"]), None)
+    w(f"\nThe full civilization climbed to the top of the curriculum "
+      f"{'by generation ' + str(first_top) if first_top is not None else 'over the run'} "
+      f"and sustained mastery of deep multi-step pipelines. The no-sharing control "
+      f"advanced only as far as a *single lifetime* of discovery allows and then "
+      f"**collapsed to mastered-level {ch[-1]['mastered_level']}**: every generation "
+      f"restarts from zero macros, so tasks beyond a one-lifetime reach are never "
+      f"solved. Capability that compounds across generations requires the cultural "
+      f"channel — exactly the project's thesis, now in a tool-using domain.\n")
+    w("\n![Climbing the task-complexity ladder](figures/12_computer_curriculum.png)\n")
+    w("![Per-level solve rate over generations](figures/13_computer_levels.png)\n")
+
+    # concrete worked example
+    tr = demos_out.get("computer_trace")
+    if tr:
+        w("\n**A worked example.** An agent that inherited basic macros was given a "
+          f"level-{tr['level']} task (`{tr['task_name']}`, keyword "
+          f"*\"{tr['keyword']}\"*, input file `{tr['input_file']}`). It produced the "
+          f"program:\n")
+        w(f"\n```\n{tr['discovered_program']}\n```\n")
+        w(f"\nground-truth pipeline: `{tr['canonical_program']}` — "
+          f"output `{tr['output']!r}` vs expected `{tr['expected']!r}` "
+          f"({'solved' if tr['solved'] else 'unsolved'}). Note the agent may find a "
+          f"*shorter equivalent* program by reusing an inherited macro, which is "
+          f"itself a small instance of cultural knowledge transfer.\n")
+    top = full.culture.top_skills(8)
+    if top:
+        w("\nMost reputable computer macros in the final culture:\n")
+        w("| macro | program | depth | adoption | reputation |\n")
+        w("|---|---|---|---|---|\n")
+        for s in top:
+            w(f"| {s.name} | {'→'.join(s.program)} | {s.complexity()} | "
+              f"{s.adoption} | {s.reputation:.1f} |\n")

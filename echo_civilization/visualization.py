@@ -181,6 +181,56 @@ def plot_social_emergence(result, path):
     return _save(fig, path)
 
 
+def _smooth(xs, k=3):
+    out = []
+    for i in range(len(xs)):
+        lo = max(0, i - k + 1)
+        out.append(float(np.mean(xs[lo:i + 1])))
+    return out
+
+
+def plot_computer_curriculum(full_hist, control_hist, path):
+    """Headline extension figure: how high up the open-ended task-complexity
+    ladder each civilization climbs over generations (auto-curriculum)."""
+    fig, ax = plt.subplots(figsize=(8.5, 5))
+    gens_f = range(len(full_hist))
+    gens_c = range(len(control_hist))
+    ax.plot(gens_f, [h["frontier"] for h in full_hist], color="#c0392b",
+            lw=2, label="full civilization — curriculum frontier unlocked")
+    ax.plot(gens_f, _smooth([h["mastered_level"] for h in full_hist]),
+            color="#e67e22", ls="--", label="full civilization — level mastered (smoothed)")
+    ax.plot(gens_c, _smooth([h["mastered_level"] for h in control_hist]),
+            color="#2980b9", ls="--", label="no-sharing control — level mastered (smoothed)")
+    ax.set_title("Computer World: climbing the task-complexity ladder\n"
+                 "(agents evolving to match increasingly sophisticated tasks)")
+    ax.set_xlabel("generation")
+    ax.set_ylabel("curriculum level (1=copy file … 5=deep pipeline)")
+    ax.set_yticks(range(0, full_hist[0]["max_level"] + 1))
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=8)
+    return _save(fig, path)
+
+
+def plot_computer_levels(full_hist, path):
+    """Per-level solve rate over generations for the full computer civilization."""
+    max_level = full_hist[0]["max_level"]
+    fig, ax = plt.subplots(figsize=(8.5, 5))
+    for lvl in range(1, max_level + 1):
+        ys = [h["solve_rate_by_level"].get(lvl) for h in full_hist]
+        gens = [i for i, y in enumerate(ys) if y is not None]
+        vals = [y for y in ys if y is not None]
+        if gens:
+            ax.plot(gens, vals, marker="o", ms=2, label=f"level {lvl}")
+    ax.set_title("Computer World: solve rate per task level over generations\n"
+                 "(deeper levels only become solvable after macros accumulate)")
+    ax.set_xlabel("generation")
+    ax.set_ylabel("solve rate (when that level was offered)")
+    ax.set_ylim(0, 1.02)
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=8)
+    return _save(fig, path)
+
+
 def plot_grid_evolution(curve, path):
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot([c["avg"] for c in curve], marker="o", ms=3, label="population mean")

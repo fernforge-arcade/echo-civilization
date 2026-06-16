@@ -104,6 +104,39 @@ def grid_evolution_demo(seed: int = 0, generations: int = 30, pop: int = 40,
             "initial_best": curve[0]["best"]}
 
 
+def computer_trace_demo(seed: int = 3):
+    """Show an agent that has inherited basic macros solving a real multi-step
+    computer task, returning a human-readable trace for the report."""
+    from .environments.computer_world import (CURRICULUM, ComputerWorld,
+                                               run_computer_program)
+    from .skills import Skill
+
+    rng = np.random.default_rng(seed)
+    world = ComputerWorld(rng)
+    agent = Agent(0, rng)
+    # give it the lower-level macros a mature civilization would have inherited
+    for lvl in range(1, 4):
+        for name, prog in CURRICULUM[lvl]:
+            agent.learn_computer_skill(Skill(name=name, program=prog,
+                                             creator="culture", generation=0))
+    task = world.sample(4)  # a level-4 pipeline task
+    res, disc = agent.solve_computer_task(task, budget=200)
+    final = run_computer_program(res.program, task.machine, task.ctx)
+    return {
+        "task_name": task.name,
+        "level": task.level,
+        "keyword": task.ctx.keyword,
+        "input_file": task.ctx.input_file,
+        "files": {k: v for k, v in list(task.machine.files.items())[:3]},
+        "discovered_program": " -> ".join(res.program),
+        "canonical_program": " -> ".join(task.canonical),
+        "solved": res.solved,
+        "via_composition": res.via_composition,
+        "output": final.files.get(task.ctx.output_file, ""),
+        "expected": task.expected_output,
+    }
+
+
 def social_demo(seed: int = 0, n_agents: int = 6, rounds: int = 200,
                 n_concepts: int = 3):
     """Run the Lewis signalling game; a protocol should emerge from scratch."""

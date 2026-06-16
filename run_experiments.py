@@ -16,6 +16,7 @@ import argparse
 import time
 
 from echo_civilization import demos, visualization as viz
+from echo_civilization.computer_evolution import run_computer_experiments
 from echo_civilization.database import Database
 from echo_civilization.evaluation import run_all_experiments
 from echo_civilization.report import generate_report
@@ -44,7 +45,7 @@ def main():
     db = Database(args.db)
 
     # 1. baseline experiments A/B/C/D ------------------------------------
-    print("\n[1/4] Running baseline experiments A/B/C/D ...")
+    print("\n[1/5] Running baseline experiments A/B/C/D ...")
     results = run_all_experiments(
         db=db, generations=args.generations, population_size=args.population,
         budget=args.budget, tasks_per_agent=args.tasks_per_agent, seed=args.seed)
@@ -53,21 +54,33 @@ def main():
         print(f"    {name:30s} capability {cc[0]:.2f} -> {cc[-1]:.2f}"
               f"  (culture={r['culture'].size()})")
 
-    # 2. subsystem demos -------------------------------------------------
-    print("\n[2/4] Running subsystem demos (Echo / Memory / Grid / Social) ...")
+    # 2. Computer World — auto-curriculum (Experiment E) -----------------
+    print("\n[2/5] Running Computer World auto-curriculum (Experiment E) ...")
+    comp = run_computer_experiments(
+        db=db, generations=args.generations, population_size=args.population,
+        seed=args.seed)
+    full_h, ctrl_h = comp["full"].history, comp["control"].history
+    print(f"    full civ frontier {full_h[0]['frontier']} -> "
+          f"{full_h[-1]['frontier']}/{full_h[-1]['max_level']}  "
+          f"(macros={comp['full'].culture.size()}); "
+          f"control stalls at mastered={ctrl_h[-1]['mastered_level']}")
+
+    # 3. subsystem demos -------------------------------------------------
+    print("\n[3/5] Running subsystem demos (Echo / Memory / Grid / Social) ...")
     demos_out = {
         "echo": demos.echo_qlearning_demo(),
         "memory": demos.memory_demo(),
         "grid": demos.grid_evolution_demo(),
         "social": demos.social_demo(),
+        "computer_trace": demos.computer_trace_demo(),
     }
     print(f"    echo mastery@episode {demos_out['echo']['episodes_to_mastery']}, "
           f"grid {demos_out['grid']['initial_best']:.1f}->"
           f"{demos_out['grid']['final_best']:.1f}, "
           f"social acc {demos_out['social']['final_accuracy']:.2f}")
 
-    # 3. figures ---------------------------------------------------------
-    print("\n[3/4] Rendering figures ...")
+    # 4. figures ---------------------------------------------------------
+    print("\n[4/5] Rendering figures ...")
     D = results["D_full_civilization"]
     figures = {}
     figures["avg"] = viz.plot_average_intelligence(results, "figures/01_average_intelligence.png")
@@ -81,11 +94,16 @@ def main():
     figures["grid"] = viz.plot_grid_evolution(demos_out["grid"]["curve"], "figures/09_grid_evolution.png")
     figures["social"] = viz.plot_social_emergence(demos_out["social"], "figures/10_social_emergence.png")
     figures["diff"] = viz.plot_difficulty_breakdown(D, "figures/11_difficulty_breakdown.png")
+    figures["curriculum"] = viz.plot_computer_curriculum(
+        full_h, ctrl_h, "figures/12_computer_curriculum.png")
+    figures["levels"] = viz.plot_computer_levels(
+        full_h, "figures/13_computer_levels.png")
     print(f"    wrote {len(figures)} figures to figures/")
 
-    # 4. report ----------------------------------------------------------
-    print("\n[4/4] Generating research_report.md ...")
-    path = generate_report(results, demos_out, figures, "research_report.md")
+    # 5. report ----------------------------------------------------------
+    print("\n[5/5] Generating research_report.md ...")
+    path = generate_report(results, demos_out, figures, "research_report.md",
+                           computer=comp)
     db.close()
 
     print(f"\nDone in {time.time() - t0:.1f}s.")

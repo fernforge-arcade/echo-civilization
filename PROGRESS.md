@@ -76,3 +76,33 @@ Capability on held-out HARD tasks, identical budget per agent:
 `./venv/bin/python run_experiments.py`  (writes results/ db, figures/, report)
 `--quick` for a fast smaller run. Outputs: research_report.md, figures/*.png,
 results/echo_civilization.db.
+
+## EXTENSION (resume #2) — toward computer-use agents
+Git initialised (note: needed `git config --global --add safe.directory
+/home/node/workspace` — repo dir owned by root, runner is user `node`).
+
+NEW: Experiment E — **Computer World** (`environments/computer_world.py`): a
+simulated VM (virtual filesystem + register) operated via shell-like ops
+(read_input/find/grep/sort/uniq/count_lines/write_output...). Solutions are
+multi-step programs; learned programs = reusable macros (skills) that are shared,
+inherited, and **modified** (insert one op) to build the next macro.
+- `synthesis.py`: domain-agnostic staged synthesiser (recall -> recombine ->
+  MODIFY known macros -> blind discovery). The "modify" stage is what lets a
+  level-(k-1) macro reach level k cheaply.
+- `computer_evolution.py`: `ComputerCivilization` + **auto-curriculum** (frontier
+  advances when population masters current level). Full civ climbs frontier 1->5
+  and sustains; no-sharing control collapses to mastered=0. Tuning: budget=150,
+  advance_threshold=0.45, tasks_per_agent=10 (do NOT lower budget below ~140 or
+  L2->L3 climbing stalls).
+- agent.py: added `computer_skills` library + `solve_computer_task`.
+- figures 12 (curriculum climb) + 13 (per-level solve rate); report section 3.4 +
+  conclusion 5 + honest AGI-scope limitation.
+
+## OPERATOR ROADMAP (requested mid-run, build in this order)
+1. [DONE] simulated Computer World (above).
+2. [IN PROGRESS] REAL-OS world: agents execute ACTUAL sandboxed shell commands
+   (whitelisted, inside a temp dir, no network) as genuine computer-use agents.
+   File: environments/real_computer_world.py + experiment F.
+3. [ROADMAP/doc] highest-abstraction world: agents autonomously run a long-lived
+   task/"business" forever (hierarchical goals, sub-task decomposition, economy).
+   Document as staged next step; prototype if time allows.

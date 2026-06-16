@@ -88,11 +88,46 @@ Most reputable skills in the final culture (condition D):
 ![Per-difficulty solve rate (condition D)](figures/11_difficulty_breakdown.png)
 ![Best-agent fitness](figures/02_best_performance.png)
 
+### 3.4 Scaling up: learning to operate a computer (auto-curriculum)
+To test whether the same accumulation principle can push agents toward *genuinely more sophisticated* behaviour, we added **Computer World** — a simulated VM with a virtual filesystem and a working register that agents operate via shell-like commands (`read_input`, `find`, `grep`, `sort`, `uniq`, `count_lines`, `write_output`, …). A solution is a multi-step *program*; learned programs become reusable **macros** that are shared, taught and inherited like any other skill, and can be **modified** (inserting one operation) to build the next, harder macro.
+An **auto-curriculum** raises the offered task level whenever the population masters the current one (≥45% solve rate), from level 1 (*copy a file*) up to level 5 (*locate → filter → sort → de-duplicate → count → write*). The headline metric is **how far up this open-ended ladder each civilization climbs**.
+
+| Condition | start frontier | final frontier | final mastered level | macros in culture | teaching transfers |
+|---|---|---|---|---|---|
+| Full civilization (culture+inheritance+teaching) | 1 | **5/5** | 5 | 15 | 27 |
+| No-sharing control (identical otherwise) | 1 | 3/5 | **0** | 0 | 0 |
+
+The full civilization climbed to the top of the curriculum by generation 3 and sustained mastery of deep multi-step pipelines. The no-sharing control advanced only as far as a *single lifetime* of discovery allows and then **collapsed to mastered-level 0**: every generation restarts from zero macros, so tasks beyond a one-lifetime reach are never solved. Capability that compounds across generations requires the cultural channel — exactly the project's thesis, now in a tool-using domain.
+
+![Climbing the task-complexity ladder](figures/12_computer_curriculum.png)
+![Per-level solve rate over generations](figures/13_computer_levels.png)
+
+**A worked example.** An agent that inherited basic macros was given a level-4 task (`grep_sort_count`, keyword *"blue"*, input file `gold.txt`). It produced the program:
+
+```
+read_input -> grep -> count_lines -> write_output
+```
+
+ground-truth pipeline: `read_input -> grep -> sort -> count_lines -> write_output` — output `'3'` vs expected `'3'` (solved). Note the agent may find a *shorter equivalent* program by reusing an inherited macro, which is itself a small instance of cultural knowledge transfer.
+
+Most reputable computer macros in the final culture:
+| macro | program | depth | adoption | reputation |
+|---|---|---|---|---|
+| copy_file | read_input→write_output | 2 | 88 | 12.4 |
+| copy_file | read_input→append_output | 2 | 81 | 10.4 |
+| sort_file | read_input→sort→append_output | 3 | 71 | 10.4 |
+| upper_file | read_input→upper→append_output | 3 | 82 | 8.4 |
+| grep_file | read_input→grep→append_output | 3 | 55 | 6.4 |
+| upper_file | read_input→upper→write_output | 3 | 95 | 4.4 |
+| grep_file | read_input→grep→write_output | 3 | 102 | 4.4 |
+| grep_sort_uniq | read_input→grep→sort→append_output | 4 | 65 | 3.4 |
+
 ## 4. Conclusions
 1. **Knowledge accumulates culturally.** The headline result (supports H1): conditions with skill sharing/inheritance become measurably more capable on hard tasks over generations, while a single agent and a non-sharing population do not. Later generations solve composite and deep tasks that earlier generations, given the same budget, could not — because the building blocks had entered the shared culture.
 2. **The mechanism is recombination of inherited primitives.** Culture turns an exponential blind search into a short composition over already-known skills. This is the computational analogue of "standing on the shoulders of giants".
 3. **Vertical inheritance does most of the work; horizontal teaching adds less.** Condition C (inheritance only) and condition D (inheritance + teaching + reputation) finish close together (97% vs 96%), indicating that once skills are inherited and pooled in culture, extra horizontal copying is largely redundant in this task family.
 4. **All subsystems function independently:** individual RL (Echo), memory and its decay/transfer (Memory), evolved neural control (Grid), and emergent communication (Social).
+5. **Agents evolve to match increasingly sophisticated tasks — but only with culture.** In the Computer World, an auto-curriculum raised task difficulty as the population improved. The full civilization climbed the ladder from level 1 to level 5/5 (multi-step VM pipelines) and sustained it, whereas an identical population without sharing collapsed to mastered-level 0 once tasks exceeded what one lifetime can discover. The same accumulation principle thus extends from toy string tasks to **open-ended, tool-using computer tasks** — the direction of genuinely more capable agents.
 
 ## 5. Failures, limitations & threats to validity
 - **Task domain is narrow.** All accumulation experiments use string transforms. The accumulation result should be replicated in richer domains before being generalised.
@@ -101,6 +136,7 @@ Most reputable skills in the final culture (condition D):
 - **Grid and social runs are noisy** (random maps / coordination), mitigated by averaging multiple lives and many rounds but not eliminated.
 - **Emergent protocols can be degenerate** (high consistency but low accuracy if two concepts collapse onto one symbol); parameters were chosen to avoid this but the failure mode exists.
 - **No statistical multi-seed confidence intervals** are reported in this single run; `run_experiments.py --seeds N` can be extended for that.
+- **This is not AGI, and does not claim to be.** The Computer World is a *simulated* VM with a fixed primitive instruction set; agents synthesise programs over those primitives, they do not learn to operate a real operating system, write free-form code, or set their own goals. What the experiment demonstrates is the *mechanism* argued to be necessary for open-ended capability growth — cumulative, recombinable, inheritable skill — operating in a tool-use domain. Scaling the primitive set toward a real sandboxed shell, learning argument values (not just op order), and letting agents propose their own tasks are the concrete next steps toward more general competence.
 
 ## 6. Reproduction
 ```
