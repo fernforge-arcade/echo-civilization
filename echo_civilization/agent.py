@@ -130,7 +130,8 @@ class Agent:
 
     # --------------------------------------------------------------- solving
     def solve_task(self, examples, query_input, budget: int = 60,
-                   generation: int = 0, allow_discovery: bool = True):
+                   generation: int = 0, allow_discovery: bool = True,
+                   learn_at_solve: bool = True):
         """Attempt to produce the correct output for `query_input`.
 
         `examples` is a list of (inp, out) demonstrating the hidden rule. Returns
@@ -140,6 +141,13 @@ class Agent:
         skills it already knows (no blind search / no new learning). This is used
         by the evaluation framework to measure *accumulated* capability, isolating
         cultural inheritance from raw per-trial brute force.
+
+        With `learn_at_solve=False` the agent does NOT abstract/store any program
+        it finds (no mutation of its skill library). This is essential for a clean
+        held-out evaluation: otherwise an agent could learn a held-out depth-2
+        composite while solving one eval task and reuse it to solve a depth-3 eval
+        task — test-time leakage. Frozen evaluation measures only knowledge that
+        accumulated during *training*.
         """
         evals = 0
         train = examples
@@ -166,7 +174,8 @@ class Agent:
             combo = tuple(a) + tuple(b)
             evals += 1
             if consistent(combo):
-                disc = self._abstract_skill(combo, train, generation, derived=True)
+                disc = (self._abstract_skill(combo, train, generation, derived=True)
+                        if learn_at_solve else None)
                 return run_program(combo, query_input), combo, evals, disc
             if evals >= budget:
                 return self._give_up(query_input, evals)
@@ -181,7 +190,8 @@ class Agent:
             evals += 8  # cost of the learning trials
             prog = (sub,)
             if consistent(prog) and evals <= budget:
-                disc = self._abstract_skill(prog, train, generation)
+                disc = (self._abstract_skill(prog, train, generation)
+                        if learn_at_solve else None)
                 return run_program(prog, query_input), prog, evals, disc
 
         # 3b) DISCOVERY from scratch: blind search over the full primitive space.
@@ -194,7 +204,8 @@ class Agent:
                 break
             evals += 1
             if consistent(combo):
-                disc = self._abstract_skill(combo, train, generation)
+                disc = (self._abstract_skill(combo, train, generation)
+                        if learn_at_solve else None)
                 return run_program(combo, query_input), combo, evals, disc
 
         return self._give_up(query_input, evals)

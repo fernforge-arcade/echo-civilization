@@ -299,3 +299,66 @@ def plot_grid_evolution(curve, path):
     ax.grid(alpha=0.3)
     ax.legend(fontsize=8)
     return _save(fig, path)
+
+
+# ----------------------------------------------------- generalization experiment
+SHORT_LABELS = {
+    "A_single": "A single",
+    "B_population_nosharing": "B no-share",
+    "C_population_memorysharing": "C sharing",
+    "D_full_civilization": "D full civ",
+}
+_COND_COLORS = {
+    "A_single": "#7f8c8d",
+    "B_population_nosharing": "#e67e22",
+    "C_population_memorysharing": "#27ae60",
+    "D_full_civilization": "#c0392b",
+}
+
+
+def plot_generalization_bars(summary, path):
+    """Grouped bars: per-condition solve rate on each suite, with seed std error
+    bars. The story is the depth-3 group: novel composites needing an inherited
+    intermediate abstraction."""
+    suites = [("train2_newinputs", "trained depth-2\n(new inputs, in-dist)"),
+              ("held2", "NOVEL depth-2\n(needs primitives)"),
+              ("held3", "NOVEL depth-3\n(needs depth-2 abstraction)")]
+    conds = list(summary)
+    x = np.arange(len(suites))
+    w = 0.2
+    fig, ax = plt.subplots(figsize=(10, 5.5))
+    for i, name in enumerate(conds):
+        means = [summary[name][s][0] for s, _ in suites]
+        stds = [summary[name][s][1] for s, _ in suites]
+        ax.bar(x + (i - 1.5) * w, means, w, yerr=stds, capsize=3,
+               label=SHORT_LABELS.get(name, name),
+               color=_COND_COLORS.get(name, None))
+    ax.set_xticks(x)
+    ax.set_xticklabels([lbl for _, lbl in suites])
+    ax.set_ylabel("frozen solve rate (no discovery, no test-time learning)")
+    ax.set_ylim(0, 1.02)
+    ax.set_title("Compositional generalization: memorization vs. recombination\n"
+                 "(held-out programs never seen in training; mean ± SD over seeds)")
+    ax.grid(alpha=0.3, axis="y")
+    ax.legend(title="condition", fontsize=9)
+    return _save(fig, path)
+
+
+def plot_generalization_curve(curves, path, suite_label="novel depth-3"):
+    """Per-generation frozen solve rate on the held-out suite (seed 0)."""
+    fig, ax = plt.subplots(figsize=(8.5, 5))
+    for name, curve in curves.items():
+        if not curve:
+            continue
+        gens = [g for g, _ in curve]
+        vals = [v for _, v in curve]
+        ax.plot(gens, vals, marker="o", ms=3, label=SHORT_LABELS.get(name, name),
+                color=_COND_COLORS.get(name, None))
+    ax.set_xlabel("generation")
+    ax.set_ylabel(f"frozen solve rate on {suite_label}")
+    ax.set_ylim(0, 1.02)
+    ax.set_title(f"Accumulation of generalization over generations\n"
+                 f"({suite_label}, never-trained composites, seed 0)")
+    ax.grid(alpha=0.3)
+    ax.legend(title="condition", fontsize=9)
+    return _save(fig, path)

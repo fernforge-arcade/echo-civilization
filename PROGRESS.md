@@ -144,3 +144,32 @@ Exp G. `--quick` and `--ent-days N` flags supported.
   learn argument values + propose their own sub-tasks.
 - Autonomous world deepening: agents propose their own goals; multi-firm economy
   with competition/trade; truly open-ended (unbounded) runs.
+
+## RESUME #4 (2026-06-16): compositional-generalization test (memorization vs. generalization)
+The headline (C/D ~0.97 vs A/B ~0.5) couldn't tell memorization from generalization
+(train + eval drew from the SAME composite programs). Built the version that can fail.
+
+NEW: `echo_civilization/generalization.py` + `run_generalization.py`.
+- Train on primitives + a SUBSET of depth-2 composites; test on DISJOINT, never-trained
+  composites stratified by depth (held-2, held-3). Held-3 built so its depth-2 sub-program
+  IS in train -> reachable only via an inherited intermediate abstraction (pairwise
+  recombination). double/dedup only appear inside composites.
+- Guards: frozen eval (allow_discovery=False AND new learn_at_solve=False flag added to
+  agent.solve_task), generous GEN_EVAL_BUDGET=4000, correctness judged on held-out QUERY,
+  oracle-check every task solvable-in-principle (100%), stratified behavioural leak check,
+  identical headline hyperparams, 3 seeds, nothing tuned to win.
+- agent.py change: added `learn_at_solve=True` param (default preserves old behavior; eval
+  passes False to prevent test-time skill abstraction = cross-task leakage). Existing
+  pipeline verified intact.
+- visualization.py: plot_generalization_bars + plot_generalization_curve (figs 16, 17).
+
+RESULT (robust, multi-seed mean): **Outcome 1 — real compositional generalization.**
+  novel depth-2: A 0.11 / B 0.20 / C 0.86 / D 0.85   (sep +0.66)
+  novel depth-3: A 0.13 / B 0.06 / C 0.60 / D 0.62   (sep +0.49)  <- the real test
+  depth-3 leaks = NONE; oracle 100%; generalization absent at gen0 (~0.05), emerges as
+  depth-2 abstractions accumulate. One depth-2 leak (commutative twin 'first then inc1',
+  spurious junk skill) — touches only the easy stratum, depth-3 clean.
+Outputs: GENERALIZATION_REPORT.md, results/generalization.json, figures/16,17.
+REPORT.md gained section 4.4; README + run command added.
+
+Reproduce: ./venv/bin/python run_generalization.py --seeds 0 1 2   (~45s)

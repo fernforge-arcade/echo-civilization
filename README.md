@@ -105,19 +105,25 @@ rung from copying a string to operating a real computer to running a business.
 ```bash
 python3 -m venv venv
 ./venv/bin/pip install -r requirements.txt
-./venv/bin/python run_experiments.py          # full run (~30s)
+./venv/bin/python run_experiments.py          # full run (~75s): worlds 0–7, A–G
 ./venv/bin/python run_experiments.py --quick   # fast smoke run
+./venv/bin/python run_generalization.py        # the memorization-vs-generalization test (~45s)
 ```
 
 Outputs:
 - **[`REPORT.md`](REPORT.md)** — the flagship research write-up: hypothesis,
   methods, all worlds with worked examples, results & statistics, every figure
   embedded, conclusions, and limitations. **Start here.**
+- **[`GENERALIZATION_REPORT.md`](GENERALIZATION_REPORT.md)** — the falsification
+  test: train on a subset of composites, test on *disjoint, never-trained*
+  composites stratified by depth. Confirms the headline is **real compositional
+  generalization** (culture +0.49 on novel depth-3 tasks), not memorization —
+  with oracle checks, behavioural leak checks, and frozen multi-seed eval.
 - `research_report.md` — the machine-generated companion, auto-written each run.
-- `figures/` — 15 PNGs (the 5 required graphs + supporting plots, including the
-  computer-curriculum, real-OS, and autonomous-firm figures).
-- `results/echo_civilization.db` — all raw data (SQLite): experiments, generations,
-  agents, skills, propagation, rewards.
+- `figures/` — 17 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, and
+  the generalization-by-depth bars + accumulation curve).
+- `results/echo_civilization.db` — all raw data (SQLite); `results/generalization.json`
+  — the generalization summary.
 
 ## Design principle
 

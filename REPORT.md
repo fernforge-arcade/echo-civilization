@@ -310,6 +310,51 @@ Pulled from the `skills` table at the final generation:
 The culture didn't just hoard primitives — it invented and retained **depth-2 and
 depth-3 composites**, the very skills that make hard tasks tractable.
 
+### 4.4 Did it generalize, or just memorize? (the test that can fail)
+
+The §4.1 headline has a hole: training and evaluation drew from the *same*
+composite programs (only the input strings differed). So "capability" could be
+culture **caching the exact compositions it trained on** — memorization, not
+generalization. We built the version that can fail (full write-up:
+[`GENERALIZATION_REPORT.md`](GENERALIZATION_REPORT.md)):
+
+- **Train** on primitives + a *subset* of depth-2 composites.
+- **Test** on **disjoint, never-trained** composites, stratified by depth.
+- **Depth-3 is the real test.** Recombination is *pairwise*, so a depth-3 target
+  is reachable only via an inherited **depth-2 building block** — held-out depth-3
+  tasks are built so their depth-2 sub-program is in the training set. Solving
+  them measures whether culture accumulates and redeploys *intermediate
+  abstractions* (the DreamCoder question), not just primitives.
+- Eval is **frozen** (no discovery, no test-time learning, generous budget);
+  every task is **oracle-verified** solvable; the final culture is **leak-checked**
+  by behaviour; identical hyperparameters; 3 seeds; nothing tuned to win.
+
+**Result — real compositional generalization** (frozen solve rate, mean ± SD over
+3 seeds):
+
+| Condition | trained depth-2 (new inputs) | **novel depth-2** | **novel depth-3** |
+|---|---|---|---|
+| A single agent | 0.20 | 0.11 | 0.13 |
+| B population, no sharing | 0.13 | 0.20 | 0.06 |
+| **C skill sharing** | 0.64 | **0.86** | **0.60** |
+| **D full civilization** | 0.63 | **0.85** | **0.62** |
+
+Culture beats the no-sharing baselines by **+0.49 on never-trained depth-3**
+composites (and +0.66 at depth-2), with **zero depth-3 leaks** (no held-out
+function was in the culture) and oracle solvability 100%. Because a non-degenerate
+depth-3 cannot be reached from two primitives, every depth-3 success **must** route
+through an inherited depth-2 abstraction. The generalization is *absent at
+generation 0* (empty culture, ~0.05 for everyone) and emerges only as the depth-2
+abstractions accumulate — see the curve below.
+
+![Compositional generalization by depth](figures/16_generalization_bars.png)
+![Accumulation of generalization over generations](figures/17_generalization_curve.png)
+
+This converts the headline from "knowledge accumulates" to the stronger,
+falsifiable claim it survived: **the civilization accumulates reusable
+intermediate abstractions and recombines them to solve problems it never saw.**
+A clean null here would have been reported just as loudly; it wasn't a null.
+
 ---
 
 ## 5. How culture actually spreads (networks)
