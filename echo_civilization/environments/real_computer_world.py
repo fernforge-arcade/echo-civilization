@@ -56,6 +56,9 @@ _OP_SHELL = {
     "concat_all":    "cat -- *.txt > {TMP} 2>/dev/null; mv {TMP} {REG}",
     "write_output":  "cp {REG} {OUT}",
     "append_output": "cat {REG} >> {OUT}",
+    # genuine whole-file operations (the operator's literal "move this file")
+    "move_file":     "mv -- {IN} {OUT}",
+    "copy_file":     "cp -- {IN} {OUT}",
 }
 
 ALLOWED_OPS = set(_OP_SHELL)

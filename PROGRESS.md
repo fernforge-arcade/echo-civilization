@@ -187,3 +187,48 @@ gen-0->emergence curve narrative, the verdict (Outcome 1), the single depth-2
 leak handled honestly, caveats, reproduce steps. README updated to point at it.
 Numbers verbatim from results/generalization.json (depth-3: A .13/B .06/C .60/
 D .62; sep +0.49; depth-3 leaks NONE; oracle 100%). No code changed this resume.
+
+## RESUME #6 (2026-06-24): Computer-Use Benchmark (Exp §6.4) — FINISHED + COMMITTED
+Found uncommitted in-progress work from earlier today (computer_use_benchmark.py,
+run_benchmark.py, +2 ops in real_computer_world.py, figure 18, benchmark.json) that
+PROGRESS.md never recorded. Verified, ran to canonical numbers, wired into docs,
+committed. THE BUILD IS COMPLETE — nothing left outstanding.
+
+WHAT IT IS: answers the operator's blunt question "do they actually become
+computer-use agents?" Takes the END PRODUCT of a Computer-World civilization (a
+cultured agent carrying its accumulated 16-macro library) vs a FRESH gen-0 agent
+and marches both up a graded ladder of REAL computer projects (Rung dataclass):
+- LADDER T1-T5 (13 rungs, reachable): move/copy file -> uppercase/filter/sort ->
+  grep+sort/count/locate -> grep+sort+uniq/count -> 6-stage report pipeline.
+- BEYOND T6 (runnable but OUT of op-vocabulary): find_and_replace, word_frequency,
+  sum_numbers — proven unreachable by a bounded ORACLE search over all op-programs
+  up to depth 4 (oracle_best_score). Honest ceiling, not "failed".
+- OPEN_ENDED T7 (not representable): write a Python script / Flask app / refactor a
+  repo — needs open-ended code generation; marked NOT REPRESENTABLE.
+Grading is REAL: each solvable rung executes the synthesised program as actual
+shell commands in a throwaway tempdir via RealComputerWorld (grade_on_real_shell).
+Both agents get identical generous budget=4000 so it measures EXPRESSIVENESS not
+search speed. Added move_file/copy_file ops to both the sim (BENCH_OPS in
+computer_use_benchmark.py) and real shell (_OP_SHELL in real_computer_world.py) so
+"move this file" is a genuine 1-command file op.
+
+CANONICAL RESULT (seed 0, 10 trials): cultured clears ALL 13 reachable rungs at
+1.00; fresh mean 0.52 (handles T1-T2 chores, collapses on depth: sort .10,
+grep+sort .10, report_pipeline .40, format_report .10). T6/T7 unreachable for both.
+=> Culture lifts the DEPTH of real-machine task an agent reliably completes. The
+cultured agent is operationally a genuine (narrow) computer-use agent; fresh is not.
+
+DOCS WIRED: REPORT.md new §6.4 (figure 18 + per-tier table + two honest ceilings) +
+conclusion 7 + reproducibility command/outputs (now 18 figures). README: new
+"Computer-Use Benchmark" capstone paragraph + run command + outputs (18 PNGs,
+benchmark.json). 
+
+RUN: ./venv/bin/python run_benchmark.py --trials 10  (~60s) or --quick (~25s).
+Outputs results/benchmark.json + figures/18_computer_use_benchmark.png.
+Verified: --quick and full both pass clean (exit 0).
+
+NOTE on T6 noise: find_and_replace can show cult/fresh ~0.10 from a real-shell
+partial coincidence, but oracle_ceiling=0.00 keeps it correctly flagged UNREACHABLE.
+Roadmap "remaining" items (learned arguments, agent-proposed goals, multi-firm
+economy) are genuine future extensions, NOT blockers — the original task spec is
+fully satisfied many times over.

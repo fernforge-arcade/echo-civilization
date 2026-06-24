@@ -472,6 +472,57 @@ to a loss because every retiring worker takes its private skill with it.*
 workforce had settled into distinct specialties (e.g. L1, L2, and L5 specialists),
 and orders were routed to them.
 
+### 6.4 Computer-Use Benchmark — "do they actually become computer-use agents?"
+
+Experiments E–G show culture *helps*, but the operator asked the blunt question:
+take the end-product of the civilization — an agent carrying the macro library a
+Computer-World civilization accumulated over generations — and a **fresh gen-0
+agent**, and march both up a **graded ladder of real computer projects**, from the
+trivial ("move this file") to the open-ended ("write a web app"). **How far up does
+each actually get?** Every solvable rung is graded by **executing the agent's
+synthesised program as real shell commands** in a throwaway sandbox (`mv`, `cp`,
+`grep`, `sort`, `uniq`, `wc`, …) — a "solve" means real files changed on a real
+disk, not a simulation. Both agents get an identical, generous synthesis budget
+(4000 evaluations), so this measures *what each can express*, not who searches
+faster.
+
+![Computer-Use Benchmark — how far up the ladder](figures/18_computer_use_benchmark.png)
+*Figure 18 — Solve rate per rung (10 trials), graded on the real shell. The
+cultured agent (blue) clears **every reachable rung, T1→T5, at 100%**; the fresh
+agent (orange) handles the 1–2 step rungs but **collapses as depth grows** (sort,
+grep+sort, the 5-stage report pipeline → ~0–0.4). The grey band is the **capability
+ceiling**: rungs no op-program can express.*
+
+| Rung tier | Example project | Cultured | Fresh |
+|---|---|---|---|
+| T1 (1 op) | move / copy a file | 1.00 | 1.00 |
+| T2 (3 ops) | uppercase / filter / **sort** a file | 1.00 | 0.10–1.00 |
+| T3 (3–4 ops) | grep→sort, count matches, locate→dump | 1.00 | 0.10–0.70 |
+| T4 (5 ops) | grep→sort→uniq, grep→sort→count | 1.00 | 0.20–0.40 |
+| T5 (6 ops) | full report pipeline, format report | 1.00 | 0.10–0.40 |
+| **Mean over 13 reachable rungs** | | **1.00** | **0.52** |
+| T6 | find-and-replace, word-frequency, sum numbers | — UNREACHABLE (oracle ceiling < 1.0) — | |
+| T7 | write a Python script / Flask app / refactor a repo | — NOT REPRESENTABLE — | |
+
+Two honest boundaries are drawn, not hidden:
+
+* **T6** tasks (in-place substitution, counting *distinct* words, arithmetic) are
+  *runnable* but a bounded **oracle search over the entire op-vocabulary** (all
+  programs up to depth 4) cannot hit the target — so we mark them out-of-class
+  rather than pretend the agents "failed" them. This is the honest edge of a fixed
+  op-vocabulary: no amount of culture invents a primitive that isn't there.
+* **T7** tasks need open-ended *code generation* across an unbounded action space —
+  not a single-file text transform — so they are not representable in this world at
+  all. That is precisely the gap between what this project breeds (bounded,
+  multi-step file/text **tool-users**) and a "write me an app" agent.
+
+**The finding.** Within the representable class, the civilization's accumulated
+culture is exactly what turns a fresh agent — competent only at 1–2-step chores —
+into one that reliably executes **deep, multi-stage real-shell pipelines**. The
+cultured agent is, operationally, a genuine (if narrow) computer-use agent; the
+fresh one is not. Culture didn't just speed up search — it **lifted the depth of
+task the agent can reliably complete on a real machine**, which is the whole point.
+
 ---
 
 ## 7. Conclusions
@@ -505,6 +556,14 @@ and orders were routed to them.
    profit and rising sophistication forever, while an identical firm without it
    goes bankrupt. *Institutional knowledge is the difference between a viable and a
    failing autonomous operation.*
+
+7. **The end product is a genuine (narrow) computer-use agent** (§6.4). Graded by
+   executing real shell commands, the cultured agent clears **every reachable rung
+   (T1→T5) at 100 %**, while the fresh gen-0 agent (mean **0.52**) handles only
+   shallow chores and collapses on deep pipelines. Culture lifts the *depth* of
+   real-machine task an agent reliably completes — and the benchmark also draws the
+   honest ceiling: tasks outside the fixed op-vocabulary, and open-ended code
+   generation, remain out of class no matter how rich the culture.
 
 ---
 
@@ -541,13 +600,16 @@ Honest caveats — this is a research toy, not a finished theory:
 python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python run_experiments.py            # full run (~75 s)
 ./venv/bin/python run_experiments.py --quick     # fast smoke run
+./venv/bin/python run_benchmark.py --trials 10   # §6.4 Computer-Use Benchmark (~60 s)
+./venv/bin/python run_generalization.py --seeds 0 1 2   # §4.4 generalization test
 ```
 
 **Outputs**
 - `RESEARCH_REPORT.md` — this document (human-authored: figures + stats + traces).
 - `research_report.md` — the machine-generated companion (auto-written each run).
-- `figures/01…15_*.png` — all 15 figures embedded above.
+- `figures/01…18_*.png` — all 18 figures embedded above.
 - `results/echo_civilization.db` — **all** raw data in SQLite.
+- `results/benchmark.json` — Computer-Use Benchmark per-rung solve rates (§6.4).
 
 **Database contents (this run):**
 

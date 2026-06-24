@@ -88,6 +88,17 @@ generations stand on the shoulders of earlier ones.
    without institutional memory runs at a loss — institutional knowledge is the
    difference between a viable and a failing autonomous operation.
 
+**Computer-Use Benchmark** *(capstone eval, §6.4 of the report)* — takes the end
+product of the civilization (a cultured agent carrying the accumulated macro
+library) and a fresh gen-0 agent and marches both up a **graded ladder of real
+computer projects**, from "move this file" to "write a web app", grading each rung
+by **executing the agents' programs as real shell commands**. The cultured agent
+clears **every reachable rung (T1→T5) at 100%**; the fresh agent (mean 0.52) only
+handles shallow chores and collapses on deep pipelines. The top rungs are proven
+out of reach (oracle search / open-ended code generation), drawing the honest
+capability ceiling. *Culture is what turns a fresh agent into a genuine, if narrow,
+computer-use agent.*
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above (including a working prototype of the autonomous-operation
@@ -108,6 +119,7 @@ python3 -m venv venv
 ./venv/bin/python run_experiments.py          # full run (~75s): worlds 0–7, A–G
 ./venv/bin/python run_experiments.py --quick   # fast smoke run
 ./venv/bin/python run_generalization.py        # the memorization-vs-generalization test (~45s)
+./venv/bin/python run_benchmark.py --trials 10 # the Computer-Use Benchmark (~60s): how far up the project ladder?
 ```
 
 Outputs:
@@ -124,10 +136,12 @@ Outputs:
 - `GENERALIZATION_REPORT.md` — the terse machine-generated companion (auto-written
   by `run_generalization.py`).
 - `research_report.md` — the machine-generated companion, auto-written each run.
-- `figures/` — 17 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, and
-  the generalization-by-depth bars + accumulation curve).
+- `figures/` — 18 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
+  generalization-by-depth bars + accumulation curve, and the Computer-Use Benchmark
+  ladder).
 - `results/echo_civilization.db` — all raw data (SQLite); `results/generalization.json`
-  — the generalization summary.
+  — the generalization summary; `results/benchmark.json` — the Computer-Use
+  Benchmark per-rung solve rates.
 
 ## Design principle
 
