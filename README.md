@@ -99,11 +99,25 @@ out of reach (oracle search / open-ended code generation), drawing the honest
 capability ceiling. *Culture is what turns a fresh agent into a genuine, if narrow,
 computer-use agent.*
 
+**Computer-Use Frontier** *(§6.5 / [`COMPUTER_USE_FRONTIER.md`](COMPUTER_USE_FRONTIER.md))* —
+the operator asked *what would it take to actually reach those locked top rungs?*
+We brainstormed the option space and built the two mechanisms that knock the walls
+down, still with **no pretrained model**: (1) **parametric operations +
+argument-by-example** — ops gain holes (`replace(<find>,<repl>)`) and the agent
+*infers the literal from input→output examples* (the FlashFill idea) — which
+unlocks all of Tier 6; and (2) **grammar-guided code synthesis** — the agent emits
+a program in a tiny grammar that **compiles to real Python and is executed against
+tests**, taking the "write a CSV-averages script" Tier-7 rung from *not
+representable* to *reachable and really run*. The ceiling **moves up two tiers**
+and the law still holds: the unlocking skill is expensive to discover, cheap to
+inherit, so under a tight budget only the **cultured** agent clears the new rungs.
+
 ## Roadmap (raising the level of abstraction)
 
-Done: worlds 0–7 above (including a working prototype of the autonomous-operation
-world). Next: a wider sandboxed shell with **learned command arguments** and
-agent-proposed sub-tasks; and a deeper autonomous world where agents **propose
+Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
+arguments + real code generation, §6.5). Next: a wider sandboxed shell with
+agent-proposed sub-tasks; learned grammar weights to reach the harder Tier-7 rungs
+(Flask app, repo refactor); and a deeper autonomous world where agents **propose
 their own goals**, with a multi-firm economy (competition, trade) over truly
 open-ended horizons. The civilization machinery (skills, culture, teaching,
 reputation, inheritance, specialization) is the substrate; each rung adds
@@ -120,6 +134,7 @@ python3 -m venv venv
 ./venv/bin/python run_experiments.py --quick   # fast smoke run
 ./venv/bin/python run_generalization.py        # the memorization-vs-generalization test (~45s)
 ./venv/bin/python run_benchmark.py --trials 10 # the Computer-Use Benchmark (~60s): how far up the project ladder?
+./venv/bin/python run_frontier.py --trials 10  # the Computer-Use Frontier (~2.5min): actually reaching the locked top rungs
 ```
 
 Outputs:
@@ -136,12 +151,17 @@ Outputs:
 - `GENERALIZATION_REPORT.md` — the terse machine-generated companion (auto-written
   by `run_generalization.py`).
 - `research_report.md` — the machine-generated companion, auto-written each run.
-- `figures/` — 18 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
-  generalization-by-depth bars + accumulation curve, and the Computer-Use Benchmark
-  ladder).
+- **[`COMPUTER_USE_FRONTIER.md`](COMPUTER_USE_FRONTIER.md)** — the brainstorm→build
+  write-up for §6.5: the full menu of mechanisms considered to reach the locked
+  rungs, the two that were built (parametric ops + argument-by-example; real-Python
+  code synthesis), results, and the honest moved-ceiling.
+- `figures/` — 19 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
+  generalization-by-depth bars + accumulation curve, the Computer-Use Benchmark
+  ladder, and the Computer-Use Frontier unlock).
 - `results/echo_civilization.db` — all raw data (SQLite); `results/generalization.json`
   — the generalization summary; `results/benchmark.json` — the Computer-Use
-  Benchmark per-rung solve rates.
+  Benchmark per-rung solve rates; `results/frontier.json` — the Tier-6/7 frontier
+  unlock results.
 
 ## Design principle
 

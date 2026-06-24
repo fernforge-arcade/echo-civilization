@@ -188,6 +188,49 @@ leak handled honestly, caveats, reproduce steps. README updated to point at it.
 Numbers verbatim from results/generalization.json (depth-3: A .13/B .06/C .60/
 D .62; sep +0.49; depth-3 leaks NONE; oracle 100%). No code changed this resume.
 
+## RESUME #7 (2026-06-24): Computer-Use FRONTIER (§6.5) — reaching the locked rungs
+Operator asked: "Brainstorm ways to make it so that they could actually hit the
+remaining computer-use levels" + "Continue the build now." Built it.
+
+WHAT: §6.4 benchmark stopped at two honest walls — Tier 6 (find_and_replace,
+word_frequency, sum_numbers: runnable but OUT of op-vocabulary, oracle-proven) and
+Tier 7 (write a Python script: NOT REPRESENTABLE). This resume knocks both down
+with NO pretrained model, keeping the thesis (expensive-to-discover / cheap-to-
+inherit => culture decides).
+
+TWO NEW MECHANISMS (after a 6-option brainstorm in COMPUTER_USE_FRONTIER.md):
+1. echo_civilization/frontier.py — PARAMETRIC OPS + ARGUMENT-BY-EXAMPLE. Ops gain
+   holes: replace(<find>,<repl>), prefix_lines(<text>); + reductions word_freq,
+   sum_numbers. Agent INFERS hole-fillers from input->output examples (FlashFill):
+   find=token that disappeared, repl=token that appeared (infer_replace_args/
+   mine_literals). A skill is now a TEMPLATED MACRO (op-seq WITH holes), refilled per
+   task. synthesize_param(known_templates, examples, budget, rng): recall+fill else
+   discover. Unlocks all of Tier 6.
+2. echo_civilization/codegen.py — GRAMMAR-GUIDED CODE SYNTHESIS. Tiny typed grammar
+   (render: skeleton×reducer×header×delim×fmt) -> REAL Python -> run_script runs it
+   in a subprocess vs hidden tests. synthesize_code keeps first program passing all
+   tests; inherited skeleton tried first. Moves T7 csv->column-averages from NOT
+   REPRESENTABLE to reachable+really-run. (Flask/refactor stay out of reach — honest.)
+
+RUNNER: run_frontier.py — two budget regimes: GENEROUS (did ceiling move?) + TIGHT
+(does culture still decide). Emits results/frontier.json + figures/19_*.png.
+Run --trials 10 (~2.5min) or --quick (~1min). GOTCHA: --quick OVERWRITES
+frontier.json/fig with 4-trial data; report tables cite 10-trial canonical numbers,
+so ALWAYS regenerate with --trials 10 before committing.
+
+CANONICAL RESULT (seed 0, 10 trials): Tier-6 generous fresh≈cult≈1.0 (reachable now;
+swap_words caps 0.90 — honest PBE diff ambiguity), TIGHT budget=12: fresh 0.00-0.10
+vs cult 0.90-1.00. Tier-7 generous both 1.0 (cult 3 real runs vs fresh 147), tight
+budget=60: fresh 0.00 vs cult 1.00. => ceiling moved 2 tiers, culture still decides.
+TUNING (don't revert): TIER6_TIGHT=12/GENEROUS=300, TIER7_TIGHT=60/GENEROUS=400 in
+run_frontier.py; codegen SKELETONS order puts correct per_column_reduce LAST so fresh
+must search (moving it first kills the cultural gap).
+
+DOCS WIRED: COMPUTER_USE_FRONTIER.md (brainstorm->build, 6-option menu, results,
+moved-ceiling). REPORT.md: §6.5 + figure 19 + conclusion 8 + T6/T7 rows updated +
+reproducibility (19 figs now). README: Frontier paragraph + roadmap + run cmd +
+outputs. Commit pending at end of this resume.
+
 ## RESUME #6 (2026-06-24): Computer-Use Benchmark (Exp §6.4) — FINISHED + COMMITTED
 Found uncommitted in-progress work from earlier today (computer_use_benchmark.py,
 run_benchmark.py, +2 ops in real_computer_world.py, figure 18, benchmark.json) that

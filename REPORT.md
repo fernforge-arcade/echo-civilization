@@ -501,8 +501,8 @@ ceiling**: rungs no op-program can express.*
 | T4 (5 ops) | grep→sort→uniq, grep→sort→count | 1.00 | 0.20–0.40 |
 | T5 (6 ops) | full report pipeline, format report | 1.00 | 0.10–0.40 |
 | **Mean over 13 reachable rungs** | | **1.00** | **0.52** |
-| T6 | find-and-replace, word-frequency, sum numbers | — UNREACHABLE (oracle ceiling < 1.0) — | |
-| T7 | write a Python script / Flask app / refactor a repo | — NOT REPRESENTABLE — | |
+| T6 | find-and-replace, word-frequency, sum numbers | — was UNREACHABLE; **now reached, see §6.5** — | |
+| T7 | write a Python script / Flask app / refactor a repo | — was NOT REPRESENTABLE; **csv-script now reached, §6.5** — | |
 
 Two honest boundaries are drawn, not hidden:
 
@@ -522,6 +522,54 @@ into one that reliably executes **deep, multi-stage real-shell pipelines**. The
 cultured agent is, operationally, a genuine (if narrow) computer-use agent; the
 fresh one is not. Culture didn't just speed up search — it **lifted the depth of
 task the agent can reliably complete on a real machine**, which is the whole point.
+
+---
+
+### 6.5 Computer-Use Frontier — actually reaching the locked rungs
+
+§6.4 stopped at two honest walls and named them rather than hiding them. The
+operator then asked the obvious follow-up: *what would it take for the agents to
+actually hit those remaining levels?* We brainstormed the option space
+(`COMPUTER_USE_FRONTIER.md`) and built the two mechanisms that knock the walls
+down — still with **no pretrained model**, and still gated by culture.
+
+**Tier 6 → reached, via parametric ops + argument-by-example.** Operations gain
+*holes* for arguments (`replace(<find>,<repl>)`, `prefix_lines(<text>)`), and the
+agent **infers the hole-fillers from input→output examples** — programming-by-
+example, the FlashFill idea, fully non-LLM. The `find`/`repl` literals are mined
+from the example diffs (a token that *disappeared* / *appeared*); two reductions
+(`word_freq`, `sum_numbers`) cover the non-literal cases. A learned skill is now a
+*templated macro* — an op-sequence with holes — refilled per task, so it
+generalises across instances.
+
+**Tier 7 → one rung reached, via grammar-guided code synthesis.** A second action
+space: the agent emits a program in a tiny typed grammar that **compiles to real
+Python**, which we **execute in a subprocess against hidden tests**, keeping the
+first that passes all of them. The *"write a Python script that reads a CSV and
+prints column averages"* rung moves from **not representable** to **reachable and
+really run**.
+
+![Computer-Use Frontier — reaching the locked rungs](figures/19_computer_use_frontier.png)
+
+We report two budget regimes so the claim stays honest — *generous* ("did the
+ceiling move?") and *tight* ("does culture still decide?"). Seed 0, 10 trials
+(`results/frontier.json`):
+
+| rung (was locked) | generous: fresh → cultured | tight: fresh → cultured |
+|---|:---:|:---:|
+| T6 find_and_replace | 1.00 → 1.00 | 0.10 → 1.00 |
+| T6 word_frequency | 1.00 → 1.00 | 0.00 → 1.00 |
+| T6 sum_numbers | 1.00 → 1.00 | 0.00 → 1.00 |
+| T6 redact_then_sort *(composite)* | 1.00 → 1.00 | 0.00 → 1.00 |
+| T7 csv → column averages *(real Python)* | 1.00 → 1.00 | 0.00 → 1.00 |
+
+**The finding.** Both tiers are now genuinely reachable — and the result keeps the
+exact shape of the rest of the project: the unlocking mechanism is **expensive to
+discover, cheap to inherit**, so under a tight budget a cultured agent recalls it
+in ~1–3 tries while a fresh agent (16–147 tries to discover) **cannot reach it**.
+The ceiling **moved up two tiers**, and culture **still decides who clears it**.
+The remaining T7 rungs (Flask app, repo refactor) need a multi-file action space
+and stay out of reach — an honest, *moved* ceiling, not a vanished one.
 
 ---
 
@@ -565,6 +613,14 @@ task the agent can reliably complete on a real machine**, which is the whole poi
    honest ceiling: tasks outside the fixed op-vocabulary, and open-ended code
    generation, remain out of class no matter how rich the culture.
 
+8. **And those frontiers are movable — by mechanism, not by scale** (§6.5). Adding
+   *parametric operations with argument-by-example* and a *grammar that synthesises
+   real Python* takes the previously locked Tier-6 and one Tier-7 rung from
+   unreachable to reached — and the same law holds two tiers higher: the unlocking
+   skill is expensive to discover and cheap to inherit, so under a tight budget the
+   cultured agent clears the new rungs and the fresh agent still cannot. No
+   pretrained model was used; the ceiling moved honestly, and culture still decides.
+
 ---
 
 ## 8. Limitations & threats to validity
@@ -601,15 +657,18 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python run_experiments.py            # full run (~75 s)
 ./venv/bin/python run_experiments.py --quick     # fast smoke run
 ./venv/bin/python run_benchmark.py --trials 10   # §6.4 Computer-Use Benchmark (~60 s)
+./venv/bin/python run_frontier.py --trials 10    # §6.5 Computer-Use Frontier (~2.5 min)
 ./venv/bin/python run_generalization.py --seeds 0 1 2   # §4.4 generalization test
 ```
 
 **Outputs**
 - `RESEARCH_REPORT.md` — this document (human-authored: figures + stats + traces).
 - `research_report.md` — the machine-generated companion (auto-written each run).
-- `figures/01…18_*.png` — all 18 figures embedded above.
+- `figures/01…19_*.png` — all 19 figures embedded above.
 - `results/echo_civilization.db` — **all** raw data in SQLite.
 - `results/benchmark.json` — Computer-Use Benchmark per-rung solve rates (§6.4).
+- `results/frontier.json` — Computer-Use Frontier: Tier-6/7 unlock results (§6.5).
+- `COMPUTER_USE_FRONTIER.md` — the brainstorm→build write-up for §6.5.
 
 **Database contents (this run):**
 
