@@ -184,3 +184,22 @@ cannot** — now demonstrated two full tiers higher than before.
 
 Reproduce: `./venv/bin/python run_frontier.py --trials 10` (~2.5 min; `--quick`
 for ~1 min).
+
+---
+
+## 6. Tier 8 — one rung higher (group-by aggregation)
+
+The Tier-7 rung reached above is a *flat* per-column reduction. The next push
+(see [`TIER8_FRONTIER_FINDINGS.md`](TIER8_FRONTIER_FINDINGS.md) and `REPORT.md`
+§6.6) climbs to a structurally harder program — **group-by aggregation**: read a
+CSV, group rows by a key column, aggregate a value column per group, print sorted
+`key:value` pairs. It needs a **dict accumulator** and a two-pass shape, and the
+agent must recover the key column, value column and reducer (none given). It is
+synthesised as real Python and **really run** against hidden tests
+(`echo_civilization/codegen2.py`, `run_tier8.py`).
+
+Result (seeds 0 and 1 identical): generous budget → fresh and cultured both 1.00
+(76 vs 16 real executions to solve); tight budget (45) → **fresh 0.00, cultured
+1.00**. The frontier moved up another rung by mechanism, and culture still decides.
+
+Reproduce: `./venv/bin/python run_tier8.py --trials 10` (~2 min).

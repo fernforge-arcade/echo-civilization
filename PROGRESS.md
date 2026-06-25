@@ -231,6 +231,44 @@ moved-ceiling). REPORT.md: §6.5 + figure 19 + conclusion 8 + T6/T7 rows updated
 reproducibility (19 figs now). README: Frontier paragraph + roadmap + run cmd +
 outputs. Commit pending at end of this resume.
 
+## RESUME #8 (2026-06-25): Computer-Use Frontier TIER 8 — group-by aggregation
+Operator: "Keep trying to expand and reach the higher runs - also keep giving me
+example output from runs in the reports too. Write a new report once you've made
+significant progress." Built the next rung up + a new report led by run output.
+
+WHAT: §6.5 reached a FLAT Tier-7 program (per-column reduce). Tier 8 climbs to a
+structurally harder, multi-statement program — GROUP-BY AGGREGATION: read CSV,
+group rows by a key col, aggregate a value col per group, print sorted key:value.
+Needs a dict accumulator + two-pass shape; agent must recover key col / val col /
+reducer (none given). Synthesised as REAL Python, RUN in subprocess vs hidden
+tests (same honest mechanism as codegen.py). NO pretrained model.
+- NEW echo_civilization/codegen2.py — grammar (4 skeletons, correct
+  group_by_aggregate LAST for fresh / FIRST for cultured; every skeleton iterates
+  the same key/val/reducer grid so fresh pays for each wrong shape), render() ->
+  real Python, run_script() real subprocess grader, synthesize_code(), task gen +
+  Python oracle (make_tier8_task / make_group_by_tests).
+- NEW run_tier8.py — fresh vs cultured at GENEROUS(300)+TIGHT(45) budgets;
+  CAPTURES a run trace (synthesised source + held-out CSV + real stdout) into
+  results/tier8.json; figure 20.
+
+CANONICAL RESULT (seed 0, 10 trials; seed 1 reproduces IDENTICALLY):
+  generous: fresh 1.00 / cultured 1.00  (76 vs 16 real executions to solve)
+  tight(45): fresh 0.00 / cultured 1.00
+=> ceiling moved another rung; culture still decides under pressure. Robust across
+   seeds. TUNING (don't revert): budgets 300/45 picked from measured fresh 63-82 /
+   cultured 3-22 execution costs; skeleton order is the only cultural lever.
+
+DOCS: REPORT.md new §6.6 (with the synthesised source + a real run trace showing
+green:35.8 red:18.5 MATCH) + conclusion 9 + repro cmd + 20-figure count + T7 row
+pointer. NEW flagship report TIER8_FRONTIER_FINDINGS.md (leads with example run
+output, per operator's "give me example output in reports"). README: Tier-8 para +
+run cmd + outputs + 20 PNGs. COMPUTER_USE_FRONTIER.md: new §6.
+
+GOTCHA: run_tier8.py grep-piped to background buffers output until exit — use the
+.output file or wait for the task notification. Each full run ~2min (subprocess
+per trial). Regenerate fig from json without re-running: import make_figure, load
+results/tier8.json. Commit at end of this resume.
+
 ## RESUME #6 (2026-06-24): Computer-Use Benchmark (Exp §6.4) — FINISHED + COMMITTED
 Found uncommitted in-progress work from earlier today (computer_use_benchmark.py,
 run_benchmark.py, +2 ops in real_computer_world.py, figure 18, benchmark.json) that

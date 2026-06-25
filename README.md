@@ -112,6 +112,16 @@ representable* to *reachable and really run*. The ceiling **moves up two tiers**
 and the law still holds: the unlocking skill is expensive to discover, cheap to
 inherit, so under a tight budget only the **cultured** agent clears the new rungs.
 
+**Tier 8 — one rung higher still** *(§6.6 / [`TIER8_FRONTIER_FINDINGS.md`](TIER8_FRONTIER_FINDINGS.md))* —
+we pushed the synthesised programs from a *flat* per-column reduction to
+**group-by aggregation**: read a CSV, group rows by a key column, aggregate a value
+column per group, print sorted `key:value` pairs — a multi-statement program with a
+**dict accumulator**, synthesised as real Python and **really run** against hidden
+tests. The hidden columns and reducer are not given; the agent recovers them. The
+same law holds one rung higher: discovering the structural skeleton costs ~76 real
+executions, recalling it ~16, so at a tight budget the cultured agent clears it
+**100%** of the time and the fresh agent **0%** (reproduced across seeds 0 and 1).
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
@@ -135,6 +145,7 @@ python3 -m venv venv
 ./venv/bin/python run_generalization.py        # the memorization-vs-generalization test (~45s)
 ./venv/bin/python run_benchmark.py --trials 10 # the Computer-Use Benchmark (~60s): how far up the project ladder?
 ./venv/bin/python run_frontier.py --trials 10  # the Computer-Use Frontier (~2.5min): actually reaching the locked top rungs
+./venv/bin/python run_tier8.py --trials 10     # Tier 8 (~2min): group-by aggregation, synthesised & really run
 ```
 
 Outputs:
@@ -155,13 +166,18 @@ Outputs:
   write-up for §6.5: the full menu of mechanisms considered to reach the locked
   rungs, the two that were built (parametric ops + argument-by-example; real-Python
   code synthesis), results, and the honest moved-ceiling.
-- `figures/` — 19 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
+- **[`TIER8_FRONTIER_FINDINGS.md`](TIER8_FRONTIER_FINDINGS.md)** — the focused
+  write-up of the Tier-8 push (group-by aggregation): leads with **example output
+  from an actual run** (the synthesised program + its real stdout on a held-out
+  CSV), then the two-budget result table, multi-seed robustness, and honest limits.
+- `figures/` — 20 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
   generalization-by-depth bars + accumulation curve, the Computer-Use Benchmark
-  ladder, and the Computer-Use Frontier unlock).
+  ladder, the Computer-Use Frontier unlock, and the Tier-8 group-by synthesis).
 - `results/echo_civilization.db` — all raw data (SQLite); `results/generalization.json`
   — the generalization summary; `results/benchmark.json` — the Computer-Use
   Benchmark per-rung solve rates; `results/frontier.json` — the Tier-6/7 frontier
-  unlock results.
+  unlock results; `results/tier8.json` — the Tier-8 group-by results plus the
+  synthesised source and a captured run trace.
 
 ## Design principle
 

@@ -502,7 +502,7 @@ ceiling**: rungs no op-program can express.*
 | T5 (6 ops) | full report pipeline, format report | 1.00 | 0.10–0.40 |
 | **Mean over 13 reachable rungs** | | **1.00** | **0.52** |
 | T6 | find-and-replace, word-frequency, sum numbers | — was UNREACHABLE; **now reached, see §6.5** — | |
-| T7 | write a Python script / Flask app / refactor a repo | — was NOT REPRESENTABLE; **csv-script now reached, §6.5** — | |
+| T7 | write a Python script / Flask app / refactor a repo | — was NOT REPRESENTABLE; **csv-script now reached, §6.5; group-by, §6.6** — | |
 
 Two honest boundaries are drawn, not hidden:
 
@@ -571,6 +571,91 @@ The ceiling **moved up two tiers**, and culture **still decides who clears it**.
 The remaining T7 rungs (Flask app, repo refactor) need a multi-file action space
 and stay out of reach — an honest, *moved* ceiling, not a vanished one.
 
+### 6.6 Computer-Use Frontier, Tier 8 — group-by aggregation (the next rung up)
+
+§6.5's reached Tier-7 rung was a *flat* per-column reduction: read a CSV, reduce
+each column, print. Real tool-use work climbs past that into programs that **build
+and iterate a data structure**. So we pushed one rung higher — a genuinely harder
+program — to test whether the same culture-decides law keeps holding as the
+synthesised code gets more complex:
+
+> **Tier 8 — group-by aggregation.** *"Read a CSV, group rows by a key column,
+> aggregate a value column per group, print sorted `key:value` pairs."*
+
+This needs a dict accumulator and a two-pass shape (accumulate per key, then
+reduce-and-emit) — and the agent must discover *which* column is the key, *which*
+is the value, and *which* of five reductions, **none of which it is told**. It is
+synthesised exactly as honestly as Tier 7: the agent emits a program in a tiny
+typed grammar that **compiles to real Python**, which we **run in a subprocess
+against hidden tests** (`echo_civilization/codegen2.py`), keeping the first that
+passes all of them. No pretrained model is involved anywhere.
+
+![Tier 8 — group-by aggregation](figures/20_tier8_groupby.png)
+
+**Example output from an actual run.** This is the program the synthesiser kept
+(seed 0) — verbatim, and the hidden transform here was *group by column 1, **mean**
+of column 2*:
+
+```python
+import sys, csv
+path = sys.argv[1]
+with open(path, newline='') as fh:
+    rows = list(csv.reader(fh))
+rows = rows[1:] if rows else rows   # drop header
+groups = {}
+for row in rows:
+    try:
+        k = row[1]
+        x = float(row[2])
+    except (IndexError, ValueError):
+        continue
+    groups.setdefault(k, []).append(x)
+out = []
+for k in sorted(groups):
+    v = groups[k]
+    r = sum(v) / len(v)
+    rs = str(int(r)) if float(r).is_integer() else str(r)
+    out.append(k + ':' + rs)
+print(' '.join(out))
+```
+
+Run for real on a **held-out** CSV it had never seen during synthesis:
+
+```
+$ cat data.csv              $ python prog.py data.csv
+c0,c1,c2                     green:35.8 red:18.5
+32,red,24
+6,green,49                   # expected: green:35.8 red:18.5   → MATCH
+29,green,28                  #   green = (49+28+21+47+34)/5 = 35.8
+36,green,21                  #   red   = (24+13)/2          = 18.5
+35,red,13
+4,green,47
+42,green,34
+```
+
+The program is correct, not memorised: it recovers the right columns and reducer
+and generalises to a fresh instance.
+
+**The result (seed 0, 10 trials, `results/tier8.json`), two budget regimes:**
+
+| regime | budget | fresh | cultured | real program executions to solve |
+|---|:---:|:---:|:---:|---|
+| **generous** (did the ceiling move?) | 300 | **1.00** | **1.00** | fresh **76** vs cultured **16** |
+| **tight** (does culture still decide?) | 45 | **0.00** | **1.00** | — |
+
+Seed 1 reproduces this exactly (generous 1.00/1.00 at 76 vs 16 executions; tight
+0.00/1.00) — the separation is not a seed artefact.
+
+**The finding.** Tier 8 is genuinely reachable now — and the law holds one rung
+higher than §6.5. The structural skeleton (`group_by_aggregate`) is **expensive to
+discover** — a fresh agent must grind through every wrong skeleton's parameter grid
+first (~76 real executions) before it even reaches the right shape — but **cheap to
+inherit**: an agent handed the skeleton from culture jumps straight to it and only
+searches the small parameter tail (~16 executions). Squeeze the budget to 45 and
+that gap becomes a wall: the fresh agent **cannot reach the rung at all (0.00)**
+while the cultured agent **clears it every time (1.00)**. The ceiling moved up
+another rung, by mechanism not scale, and culture still decides who clears it.
+
 ---
 
 ## 7. Conclusions
@@ -621,6 +706,14 @@ and stay out of reach — an honest, *moved* ceiling, not a vanished one.
    cultured agent clears the new rungs and the fresh agent still cannot. No
    pretrained model was used; the ceiling moved honestly, and culture still decides.
 
+9. **The same law survives a genuinely harder program** (§6.6). Pushed one rung
+   higher to **group-by aggregation** — a multi-statement Python program with a dict
+   accumulator, synthesised and *really run* — culture still decides under pressure:
+   at a tight budget the cultured agent clears it **100 %** of the time and the fresh
+   agent **0 %**, because the structural skeleton costs ~76 real executions to
+   discover but ~16 to recall. The frontier is not a fixed wall; it moves rung by
+   rung as the unlocking abstractions accumulate.
+
 ---
 
 ## 8. Limitations & threats to validity
@@ -658,17 +751,19 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python run_experiments.py --quick     # fast smoke run
 ./venv/bin/python run_benchmark.py --trials 10   # §6.4 Computer-Use Benchmark (~60 s)
 ./venv/bin/python run_frontier.py --trials 10    # §6.5 Computer-Use Frontier (~2.5 min)
+./venv/bin/python run_tier8.py --trials 10       # §6.6 Tier-8 group-by (~2 min)
 ./venv/bin/python run_generalization.py --seeds 0 1 2   # §4.4 generalization test
 ```
 
 **Outputs**
 - `RESEARCH_REPORT.md` — this document (human-authored: figures + stats + traces).
 - `research_report.md` — the machine-generated companion (auto-written each run).
-- `figures/01…19_*.png` — all 19 figures embedded above.
+- `figures/01…20_*.png` — all 20 figures embedded above.
 - `results/echo_civilization.db` — **all** raw data in SQLite.
 - `results/benchmark.json` — Computer-Use Benchmark per-rung solve rates (§6.4).
 - `results/frontier.json` — Computer-Use Frontier: Tier-6/7 unlock results (§6.5).
-- `COMPUTER_USE_FRONTIER.md` — the brainstorm→build write-up for §6.5.
+- `results/tier8.json` — Tier-8 group-by results + the synthesised source & run trace (§6.6).
+- `COMPUTER_USE_FRONTIER.md` — the brainstorm→build write-up for §6.5–§6.6.
 
 **Database contents (this run):**
 
