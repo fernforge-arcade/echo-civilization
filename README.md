@@ -136,11 +136,28 @@ inherited-library value (an oracle confirms every task is solvable, and at a gen
 budget both reach 1.00). Knowledge accumulated for one purpose pays off on a problem
 type it was never collected for. Run: `./venv/bin/python run_adaptability.py --seeds 0 1 2`.
 
+## Parametric abstraction — inheriting a schema with a free argument
+
+*(§8 / [`PARAMETRIC_FINDINGS.md`](PARAMETRIC_FINDINGS.md))* — every earlier study
+transmits a **concrete** program; this one transmits an **abstraction with a free
+parameter** — the schema `shift_by(k)` rather than the concrete `shift_by(2)`. A
+schema is a parametric family (`shift_by`, `shift_back`, `rotate`, `take`, `drop`,
+`repeat`) plus an *inverter* that recovers its integer argument from one (in, out)
+pair. The civilization discovers low-argument instances (args 1/2), **abstracts the
+specific argument away**, shares the schema, and a later generation **binds a novel
+high argument (3/4/5) nobody ever saw**. Against a 14-family blind-search grid (6 real
++ 8 decoy distractors), the cultured civilization solves **1.00** of the held-out
+high-argument suite under a tight budget where a fresh agent gets **0.25** — a +0.75
+gap (oracle 1.00; both reach 1.00 given a generous budget, so the suite isn't
+intrinsically hard). The unit of accumulated knowledge is now an abstraction with a
+slot. Run: `./venv/bin/python run_parametric.py --seeds 0 1 2`.
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
-arguments + real code generation, §6.5). Next: a wider sandboxed shell with
-agent-proposed sub-tasks; learned grammar weights to reach the harder Tier-7 rungs
+arguments + real code generation, §6.5), **adaptability** to a structurally novel
+task family (§7), and **parametric abstraction** — inheriting a schema and binding a
+novel argument (§8). Next: a wider sandboxed shell with agent-proposed sub-tasks; learned grammar weights to reach the harder Tier-7 rungs
 (Flask app, repo refactor); and a deeper autonomous world where agents **propose
 their own goals**, with a multi-firm economy (competition, trade) over truly
 open-ended horizons. The civilization machinery (skills, culture, teaching,
@@ -161,6 +178,7 @@ python3 -m venv venv
 ./venv/bin/python run_frontier.py --trials 10  # the Computer-Use Frontier (~2.5min): actually reaching the locked top rungs
 ./venv/bin/python run_tier8.py --trials 10     # Tier 8 (~2min): group-by aggregation, synthesised & really run
 ./venv/bin/python run_adaptability.py --seeds 0 1 2  # §7 (~70s): adaptability to a NOVEL task family
+./venv/bin/python run_parametric.py --seeds 0 1 2    # §8 (~25s): parametric abstraction (schema + novel arg)
 ```
 
 Outputs:
@@ -189,17 +207,26 @@ Outputs:
   write-up: adaptability to a structurally **novel** task family (higher-order
   combinators nobody trained on). Leads with **example output from an actual run**
   (the worked cultured-vs-fresh trace), then the two-budget result table, the
-  adaptation-vs-budget curve, and honest caveats. **Read this for the newest result.**
-- `figures/` — 22 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
+  adaptation-vs-budget curve, and honest caveats.
+- **[`PARAMETRIC_FINDINGS.md`](PARAMETRIC_FINDINGS.md)** — the flagship §8 write-up:
+  inheriting a parametric **schema** (a family + an argument inverter) and binding a
+  **novel argument** at eval. Leads with **example output from an actual run** (the
+  worked cultured-vs-fresh trace), then the two-budget result table, the
+  argument-binding frontier curve, and honest caveats. **Read this for the newest
+  result.**
+- `figures/` — 24 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
   generalization-by-depth bars + accumulation curve, the Computer-Use Benchmark
-  ladder, the Computer-Use Frontier unlock, the Tier-8 group-by synthesis, and the
-  adaptability bars + adaptation curve).
+  ladder, the Computer-Use Frontier unlock, the Tier-8 group-by synthesis, the
+  adaptability bars + adaptation curve, and the parametric-abstraction bars +
+  argument-binding frontier).
 - `results/echo_civilization.db` — all raw data (SQLite); `results/generalization.json`
   — the generalization summary; `results/benchmark.json` — the Computer-Use
   Benchmark per-rung solve rates; `results/frontier.json` — the Tier-6/7 frontier
   unlock results; `results/tier8.json` — the Tier-8 group-by results plus the
   synthesised source and a captured run trace; `results/adaptability.json` — the
-  §7 adaptability solve rates, budget curves, and worked trace.
+  §7 adaptability solve rates, budget curves, and worked trace;
+  `results/parametric.json` — the §8 parametric-abstraction solve rates, budget
+  curves, and worked trace.
 
 ## Design principle
 

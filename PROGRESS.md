@@ -15,8 +15,9 @@ giving example output from runs in the reports.
 ## Current state — COMPLETE & WORKING (extending on frontier)
 Package `echo_civilization/` is fully built and verified end-to-end. Eight
 experiments A–G plus a computer-use frontier (Tiers 6/7/8), a compositional-
-generalization study, and an ADAPTABILITY study (Experiment H — novel task family)
-all run, log to sqlite, and emit figures (22 PNGs) + reports.
+generalization study, an ADAPTABILITY study (Experiment H — novel task family) and a
+PARAMETRIC-ABSTRACTION study (Experiment I — inherited schema + novel argument) all
+run, log to sqlite, and emit figures (24 PNGs) + reports.
 
 Headline results (all reproduced, multi-seed where noted):
 - Cultural accumulation: held-out HARD tasks A/B ~0.5 (flat) vs C/D ~0.97 (climbs).
@@ -37,19 +38,35 @@ generalization.py. Runners: run_experiments / run_generalization / run_benchmark
 run_frontier / run_tier8.
 
 ## What's left (operator roadmap — adaptability frontier)
-1. **Experiment H — Adaptability: DONE & COMMITTED.** Module `adaptability.py`,
-   runner `run_adaptability.py`, viz fns `plot_adaptability_bars`/
-   `plot_adaptability_curve` (figs 21/22), REPORT.md §7 (+renumbered §8–10 +
-   conclusion bullet 10), flagship `ADAPTABILITY_FINDINGS.md`, README section all
-   shipped. Multi-seed canonical numbers below. Nothing left here.
-2. Learned ARGUMENTS + agent-proposed sub-tasks (order-only synthesis today).
-3. Agent-proposed goals; multi-firm economy; unbounded runs.
+1. **Experiment H — Adaptability: DONE & COMMITTED.**
+2. **Experiment I — Parametric Abstraction (learned ARGUMENTS): DONE & COMMITTED.**
+   parametric.py + run_parametric.py + viz (plot_parametric_bars/curve, figs 23/24) +
+   REPORT §8 (renumbered to §11 Reproduce) + PARAMETRIC_FINDINGS.md + README + exec
+   summary table rows H/I. Verified seeds 0 1 2: C/D 1.00 vs FRESH 0.25 (+0.75),
+   oracle 1.00, generous 1.00 all. Worked trace shows MODAL fresh-fails outcome
+   (fresh seed tied to call arg; 37/40 seeds fail on repeat(5)+reverse).
+3. Still open (future): agent-proposed sub-tasks/goals; multi-firm economy;
+   unbounded runs. Learned-arguments roadmap item is now complete.
 
 ## Next concrete step
-Experiment H complete. Next frontier item is (2): learned ARGUMENTS / agent-proposed
-sub-tasks, OR (3) agent-proposed goals + multi-firm economy. Pick one and design a
-test-that-can-fail in the same style (oracle audit + frozen eval + culture-decides
-under tight budget). No mechanical work pending.
+Nothing pending. If extending further, the next operator-roadmap rung is
+agent-proposed sub-tasks/goals or a multi-firm economy (both unbuilt).
+DESIGN of Experiment I (so a cold resume understands it): NEW axis = ARGUMENT BINDING,
+not order. A schema = a parametric family (shift_by/shift_back/rotate/take/drop/repeat)
+PLUS an INVERTER (binds the integer arg from one (in,out) pair in O(1)). Cultural loop:
+discover a LOW-arg instance (args 1,2 — blind-reachable) -> ABSTRACT into a schema ->
+share -> inherit -> at eval BIND a NOVEL HIGH arg (3,4,5). Cultured agent inverts the
+arg per known family (additive cost); FRESH must blind-sweep the full {14 families ×
+7 args × 2 inners} grid (real 6 + 8 DECOY distractor families that never appear in
+tasks, so never abstracted) — TIGHT budget 40 is exhausted first. Recurrence filter
+(confirm_threshold=2) prunes one-off decoy coincidences so only real families persist
+as USEFUL schemas; decoys, even if inherited, are INERT (stage 1 only iterates real
+families). Constants in parametric.py: TIGHT_BUDGET=40, GENEROUS_BUDGET=4000,
+ARG_RANGE 0..6, TRAIN_ARGS=[1,2], EVAL_ARGS=[3,4,5], words len 6-9, ACC=
+generations12/pop24/discover_budget400/tasks_per_gen2/confirm_threshold2; eval suite
+make_eval_tasks -> 108 tasks (6 real fam × 3 eval args × 2 inners × 3 each). Do NOT
+raise TIGHT past ~60 (fresh starts covering the grid) or below ~20 (cultured arg-sweep
+margin). Eval is FROZEN (no schema stored at solve), query-judged, oracle-audited.
 
 CANONICAL NUMBERS (run_adaptability.py --seeds 0 1 2, committed):
   ORACLE 1.00 (suite solvable-in-principle ✓). Generous budget: ALL = 1.00.
@@ -102,5 +119,6 @@ Other studies: `run_generalization.py --seeds 0 1 2`, `run_benchmark.py --trials
 `run_frontier.py --trials 10`, `run_tier8.py`.
 
 ## Log
-- 2026-06-26: trimmed PROGRESS.md (history -> .cb/log/progress-archive-20260626.md);
-  starting adaptability/cross-family frontier (Experiment H).
+- 2026-06-26: Experiment I (parametric abstraction) fully wired & committed —
+  run_parametric.py, viz figs 23/24, REPORT §8, PARAMETRIC_FINDINGS.md, README,
+  exec-summary rows. Verified seeds 0 1 2. Roadmap learned-arguments item complete.

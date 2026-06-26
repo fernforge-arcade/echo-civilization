@@ -401,6 +401,62 @@ def plot_adaptability_curve(curves, path):
     return _save(fig, path)
 
 
+def plot_parametric_bars(summary, tight_budget, generous_budget, oracle_rate, path):
+    """Grouped bars: per-condition frozen solve rate on the NOVEL high-argument suite
+    at the TIGHT budget (where inherited schemas decide) over a faint generous-budget
+    overlay (the ceiling both can reach). Conditions A,B,C,D,FRESH; oracle as a line.
+    Mirrors plot_adaptability_bars but the lever here is the inherited parametric
+    SCHEMA (a family + its argument inverter), not a concrete inner program."""
+    order = ["A_single", "B_population_nosharing", "C_population_memorysharing",
+             "D_full_civilization", "FRESH"]
+    conds = [c for c in order if c in summary]
+    x = np.arange(len(conds))
+    fig, ax = plt.subplots(figsize=(10, 5.5))
+    tight = [summary[c]["tight"][0] for c in conds]
+    tight_sd = [summary[c]["tight"][1] for c in conds]
+    gen = [summary[c]["generous"][0] for c in conds]
+    ax.bar(x, gen, 0.6, color="#d0d3d4", label=f"generous budget ({generous_budget})",
+           zorder=1)
+    ax.bar(x, tight, 0.42, yerr=tight_sd, capsize=4, zorder=2,
+           color=[_ADAPT_COLORS.get(c) for c in conds],
+           label=f"TIGHT budget ({tight_budget})")
+    ax.axhline(oracle_rate, ls="--", color="#8e44ad", lw=1.5,
+               label=f"oracle (holds every schema): {oracle_rate:.2f}")
+    ax.set_xticks(x)
+    ax.set_xticklabels([_ADAPT_SHORT.get(c, c) for c in conds])
+    ax.set_ylabel("frozen solve rate on NOVEL high-argument suite")
+    ax.set_ylim(0, 1.05)
+    ax.set_title("Parametric abstraction: binding a NOVEL argument to an inherited schema\n"
+                 "(args 3/4/5 unseen during accumulation; mean ± SD over seeds)")
+    ax.grid(alpha=0.3, axis="y")
+    ax.legend(fontsize=9)
+    return _save(fig, path)
+
+
+def plot_parametric_curve(curves, path):
+    """Solve rate vs. search budget for the cultured civ (D) vs a FRESH gen-0 agent
+    on the novel high-argument suite. D inverts the argument per inherited family in a
+    handful of checks; FRESH must blind-sweep the {14 families × 7 args × 2 inners}
+    grid, so it needs an order of magnitude more budget to reach the same ceiling."""
+    fig, ax = plt.subplots(figsize=(8.5, 5))
+    for name, curve in curves.items():
+        if not curve:
+            continue
+        bs = [b for b, _ in curve]
+        vs = [v for _, v in curve]
+        ax.plot(bs, vs, marker="o", ms=4, label=_ADAPT_SHORT.get(name, name),
+                color=_ADAPT_COLORS.get(name))
+    ax.set_xscale("log")
+    ax.set_xlabel("search budget (consistency checks allowed per task)")
+    ax.set_ylabel("frozen solve rate on novel high-argument suite")
+    ax.set_ylim(0, 1.05)
+    ax.set_title("Argument-binding frontier: inherited schemas move the budget wall\n"
+                 "(novel high-argument suite, seed 0)")
+    ax.grid(alpha=0.3, which="both")
+    ax.legend(title="condition", fontsize=9)
+    return _save(fig, path)
+
+
 def plot_generalization_curve(curves, path, suite_label="novel depth-3"):
     """Per-generation frozen solve rate on the held-out suite (seed 0)."""
     fig, ax = plt.subplots(figsize=(8.5, 5))

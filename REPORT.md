@@ -33,6 +33,8 @@ The same lever operates at every level of abstraction we tested:
 | E | Simulated computer (auto-curriculum) | climbs to **level 5/5** pipelines | stalls, collapses to 0 |
 | F | **Real** sandboxed `bash` | solves **5/5** real tasks | 1/5 |
 | G | Autonomous firm (runs "forever") | **+426** cumulative profit | **−92** (runs at a loss) |
+| H | **Novel** task family (combinators nobody trained on) | adapts: **0.91** under tight budget | **0.22** (fresh) |
+| I | **Parametric** schema, novel argument bound at eval | **1.00** under tight budget | **0.25** (fresh) |
 
 This is the project's thesis in one line: *the limiting resource for hard problems
 is not individual compute but accumulated culture* — and that holds from copying a
@@ -49,9 +51,10 @@ five-letter string to operating a real operating system.
 5. [How culture actually spreads (networks)](#5-how-culture-actually-spreads-networks)
 6. [Scaling up: computer use & autonomy](#6-scaling-up-computer-use--autonomy)
 7. [Adaptability to a novel task family](#7-adaptability-to-a-novel-task-family)
-8. [Conclusions](#8-conclusions)
-9. [Limitations & threats to validity](#9-limitations--threats-to-validity)
-10. [Reproducibility & data](#10-reproducibility--data)
+8. [Parametric abstraction (schema with a free argument)](#8-parametric-abstraction--inheriting-a-schema-with-a-free-argument)
+9. [Conclusions](#9-conclusions)
+10. [Limitations & threats to validity](#10-limitations--threats-to-validity)
+11. [Reproducibility & data](#11-reproducibility--data)
 
 ---
 
@@ -725,7 +728,80 @@ cultural accumulation the project set out to test.
 
 ---
 
-## 8. Conclusions
+## 8. Parametric abstraction — inheriting a schema with a free argument
+
+§7 widened the held-out family but the unit culture transmitted was still a
+**concrete** program. The operator's next steer: can the civilization transmit an
+**abstraction with a free parameter** — the schema `shift_by(k)` rather than the
+concrete `shift_by(2)` — so a later agent can **bind that parameter to a value it has
+never seen**? Full write-up: **`PARAMETRIC_FINDINGS.md`**.
+
+**The new axis — argument binding.** The eval is built from six *parametric*
+families (`shift_by`, `shift_back`, `rotate`, `take`, `drop`, `repeat`), each a
+family `f(k)` with an integer argument. An inherited **schema** is the family name
+*plus an inverter* that recovers the argument from one (input, output) pair in O(1).
+The cultural loop is faithful to the brief's diagram: an agent solves a LOW-argument
+instance (args 1/2, blind-reachable) → **abstracts the specific argument away** into a
+schema → shares it → the next generation inherits it → a later agent **binds a NOVEL
+high argument** (3/4/5, never seen by anyone). The inner transform (identity/reverse)
+is known to all and the bound argument is novel to all, so the **only** lever is
+schema possession — this is not memorisation.
+
+The blind-search grid is deliberately larger than the cultural library: **14
+families** (6 real + 8 DECOY distractors that never appear in any task). Cultural
+selection (a recurrence gate, ≥2 distinct solves) prunes one-off decoy coincidences,
+so a cultured population inherits only the 6 real families; a fresh agent has no way
+to know the decoys are useless and must waste budget ruling them out.
+
+**A worked trace** (strongest cultured agent vs. a fresh gen-0 agent, identical tight
+budget of 40 checks; eval is frozen and query-judged; argument `k`=5 never seen in
+training):
+
+```
+TRUE RULE (hidden):  repeat(5) then reverse
+DEMOS:   'bhefgbh'  -> 'hbgfehbhbgfehbhbgfehbhbgfehbhbgfehb'   (×5, reversed)
+         'fcfbhbc'  -> 'cbhbfcfcbhbfcfcbhbfcfcbhbfcfcbhbfcf'   ...
+QUERY:   'agddechb' -> 'bhceddgabhceddgabhceddgabhceddgabhceddga'  (decides correctness)
+
+CULTURED (D): inherited schema for `repeat` -> inverts k=5 from one pair
+              via inherited schema=True, 6 checks  -> SOLVED ✓
+FRESH (gen-0): no schema, blind-sweeps the 14-family × 7-arg × 2-inner grid,
+               budget exhausted before reaching repeat(5) -> gave up ✗
+```
+
+Same task, same budget; the only difference is the inherited schema.
+
+**Results** (frozen solve rate on the 108-task novel high-argument suite, mean ± SD
+over seeds 0/1/2; the oracle holding every schema solves **1.00**, proving every task
+is solvable-in-principle):
+
+| Condition | TIGHT budget (40) | generous budget (4000) | avg real schemas inherited |
+|---|---|---|---|
+| A — single agent | 0.34 ± 0.08 | 1.00 | 0.3 |
+| B — population, no sharing | 0.29 ± 0.01 | 1.00 | 0.2 |
+| C — population + sharing | **1.00 ± 0.00** | 1.00 | 6.0 |
+| D — full civilization | **1.00 ± 0.00** | 1.00 | 6.0 |
+| FRESH — gen-0, no accumulation | 0.25 ± 0.01 | 1.00 | 0.0 |
+
+At the generous budget **every condition reaches 1.00** (any argument is findable
+given enough blind search), so the suite is not intrinsically hard. But under the
+TIGHT budget the inherited schema **decides**: cultured **1.00** vs. fresh **0.25**, a
+**+0.75** gap — created entirely by inheriting parametric schemas, even though the
+argument those schemas bind is novel to every agent. A/B stay low because without
+inheritance only the *last* generation's within-run discoveries survive into the
+final population.
+
+![Parametric abstraction by condition](figures/23_parametric_bars.png)
+![Argument-binding frontier vs budget](figures/24_parametric_curve.png)
+
+This is a strictly more general form of inheritance than every earlier study: the
+unit of accumulated cultural knowledge is no longer a fixed program but an
+**abstraction with a slot**, and a descendant can fill that slot with a value its
+ancestors never used.
+
+---
+
+## 9. Conclusions
 
 1. **Knowledge accumulates culturally — strongly.** With identical per-agent
    budgets, sharing/inheritance conditions reached **96–97 %** hard-task capability
@@ -792,9 +868,18 @@ cultural accumulation the project set out to test.
    *adapts to problems generation 1 could not have approached*, because the building
    blocks survived.
 
+11. **Culture can transmit ABSTRACTIONS WITH A FREE PARAMETER, not just concrete
+   programs** (§8). When the inherited unit is a parametric *schema* (`shift_by(k)`)
+   rather than a fixed program, a cultured civilization binds a **novel argument**
+   (3/4/5, unseen by anyone) under a matched tight budget (**1.00** solve rate) where
+   a fresh agent fails (**0.25**) — a +0.75 gap, even though both reach the ceiling
+   given a generous budget. This generalises the inheritance result one level up: the
+   accumulated unit of knowledge is an abstraction with a slot, and a descendant can
+   fill that slot with a value its ancestors never used.
+
 ---
 
-## 9. Limitations & threats to validity
+## 10. Limitations & threats to validity
 
 Honest caveats — this is a research toy, not a finished theory:
 
@@ -821,7 +906,7 @@ Honest caveats — this is a research toy, not a finished theory:
 
 ---
 
-## 10. Reproducibility & data
+## 11. Reproducibility & data
 
 ```bash
 python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
@@ -832,19 +917,22 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python run_tier8.py --trials 10       # §6.6 Tier-8 group-by (~2 min)
 ./venv/bin/python run_generalization.py --seeds 0 1 2   # §4.4 generalization test
 ./venv/bin/python run_adaptability.py --seeds 0 1 2     # §7 adaptability to a novel family
+./venv/bin/python run_parametric.py --seeds 0 1 2       # §8 parametric abstraction (schema + free arg)
 ```
 
 **Outputs**
 - `RESEARCH_REPORT.md` — this document (human-authored: figures + stats + traces).
 - `research_report.md` — the machine-generated companion (auto-written each run).
-- `figures/01…22_*.png` — all 22 figures embedded above.
+- `figures/01…24_*.png` — all 24 figures embedded above.
 - `results/echo_civilization.db` — **all** raw data in SQLite.
 - `results/benchmark.json` — Computer-Use Benchmark per-rung solve rates (§6.4).
 - `results/frontier.json` — Computer-Use Frontier: Tier-6/7 unlock results (§6.5).
 - `results/tier8.json` — Tier-8 group-by results + the synthesised source & run trace (§6.6).
 - `results/adaptability.json` — adaptability solve rates, budget curves & worked trace (§7).
 - `COMPUTER_USE_FRONTIER.md` — the brainstorm→build write-up for §6.5–§6.6.
+- `results/parametric.json` — parametric-abstraction solve rates, budget curves & worked trace (§8).
 - `ADAPTABILITY_FINDINGS.md` — the flagship §7 adaptability write-up (leads with run output).
+- `PARAMETRIC_FINDINGS.md` — the flagship §8 parametric-abstraction write-up (leads with run output).
 
 **Database contents (this run):**
 
