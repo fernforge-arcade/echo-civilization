@@ -317,3 +317,39 @@ partial coincidence, but oracle_ceiling=0.00 keeps it correctly flagged UNREACHA
 Roadmap "remaining" items (learned arguments, agent-proposed goals, multi-firm
 economy) are genuine future extensions, NOT blockers — the original task spec is
 fully satisfied many times over.
+
+# Archived from PROGRESS.md on 2026-06-26 (design recaps + canonical numbers + log)
+
+## Experiment I design (parametric abstraction) — verbatim
+NEW axis = ARGUMENT BINDING, not order. A schema = a parametric family (shift_by/shift_back/rotate/take/drop/repeat)
+PLUS an INVERTER (binds the integer arg from one (in,out) pair in O(1)). Cultural loop:
+discover a LOW-arg instance (args 1,2 — blind-reachable) -> ABSTRACT into a schema ->
+share -> inherit -> at eval BIND a NOVEL HIGH arg (3,4,5). Cultured agent inverts the
+arg per known family (additive cost); FRESH must blind-sweep the full {14 families ×
+7 args × 2 inners} grid (real 6 + 8 DECOY distractor families that never appear in
+tasks, so never abstracted) — TIGHT budget 40 is exhausted first. Recurrence filter
+(confirm_threshold=2) prunes one-off decoy coincidences so only real families persist
+as USEFUL schemas; decoys, even if inherited, are INERT (stage 1 only iterates real
+families). Constants in parametric.py: TIGHT_BUDGET=40, GENEROUS_BUDGET=4000,
+ARG_RANGE 0..6, TRAIN_ARGS=[1,2], EVAL_ARGS=[3,4,5], words len 6-9, ACC=
+generations12/pop24/discover_budget400/tasks_per_gen2/confirm_threshold2; eval suite
+make_eval_tasks -> 108 tasks (6 real fam × 3 eval args × 2 inners × 3 each). Do NOT
+raise TIGHT past ~60 or below ~20.
+
+## Experiment H design (adaptability) + canonical numbers — verbatim
+CANONICAL NUMBERS (run_adaptability.py --seeds 0 1 2, committed):
+  ORACLE 1.00. Generous budget: ALL = 1.00.
+  TIGHT budget (45): A 0.55±0.25 / B 0.47 / C 0.90 / D 0.91 / FRESH 0.22±0.00.
+  Headline = best-cult 0.91 vs FRESH 0.22 = +0.69.
+Novel task family = HIGHER-ORDER COMBINATORS (map_each / map_reversed / first_only /
+last_only / map_evens) wrapped around an inner depth-2 transform. NOBODY trains on
+combinators. The ONLY cultured advantage is the inherited inner abstractions (5
+COMPOSITE_TASKS depth-2 progs). Fresh must rediscover a depth-2 inner from scratch but
+tight budget (45) is exhausted clearing the 10 single-op inner candidates (10×5=50>45)
+before reaching depth-2 → structural wall. Constants: TIGHT_BUDGET=45,
+GENEROUS_BUDGET=4000, make_novel_tasks → 100 tasks (5 comb × 5 inner × 4 each).
+
+## Log (historical)
+- 2026-06-26: Experiment I (parametric abstraction) fully wired & committed —
+  run_parametric.py, viz figs 23/24, REPORT §8, PARAMETRIC_FINDINGS.md, README,
+  exec-summary rows. Verified seeds 0 1 2. Roadmap learned-arguments item complete.

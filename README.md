@@ -152,12 +152,34 @@ gap (oracle 1.00; both reach 1.00 given a generous budget, so the suite isn't
 intrinsically hard). The unit of accumulated knowledge is now an abstraction with a
 slot. Run: `./venv/bin/python run_parametric.py --seeds 0 1 2`.
 
+## Builder World — building real apps from a one-line prompt
+
+*(§9 / [`BUILDER_FINDINGS.md`](BUILDER_FINDINGS.md))* — the operator's final steer:
+push toward what larger models are prized for — take a vague task ("build a website
+that does X") and **actually build a working application**. Done the project's honest
+way: **no pretrained model**, agents emit **real JavaScript**, that code is
+**executed in Node** against hidden behavioural tests, and an app is "built" only
+when every requirement really passes. Two mechanisms carry it: **decomposition**
+(split a spec into one sub-task per user action — additive search instead of a
+multiplicative `|handlers|^features` joint search) and **culture** (each solved
+handler is a reusable component, inherited and tried first). Across seeds 0/1/2 the
+**frontier of buildable apps** (max features in a runnable, test-passing app) rises
+only with both: a **monolithic** builder builds nothing (0), a **decomposed but
+cultureless** population plateaus (~4 features, flukes never compound), and a
+**decomposed + cultured** population climbs to the **6-feature** ceiling and holds.
+The hardest app (`notes`, 6 features) is unbuildable fresh (**0.07**) and always
+buildable with an inherited library (**1.00**). The civilization ships **five real,
+openable apps** in `output_apps/` (counter, tip calculator, to-do, shopping cart,
+notes). Run: `./venv/bin/python run_builder.py --seeds 0 1 2` (needs `node` on PATH).
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
 arguments + real code generation, §6.5), **adaptability** to a structurally novel
-task family (§7), and **parametric abstraction** — inheriting a schema and binding a
-novel argument (§8). Next: a wider sandboxed shell with agent-proposed sub-tasks; learned grammar weights to reach the harder Tier-7 rungs
+task family (§7), **parametric abstraction** — inheriting a schema and binding a
+novel argument (§8), and **Builder World** — building real, runnable apps from a
+one-line prompt via decomposition + an inherited component library (§9). Next: a
+wider sandboxed shell with agent-proposed sub-tasks; learned grammar weights to reach the harder Tier-7 rungs
 (Flask app, repo refactor); and a deeper autonomous world where agents **propose
 their own goals**, with a multi-firm economy (competition, trade) over truly
 open-ended horizons. The civilization machinery (skills, culture, teaching,
@@ -179,6 +201,7 @@ python3 -m venv venv
 ./venv/bin/python run_tier8.py --trials 10     # Tier 8 (~2min): group-by aggregation, synthesised & really run
 ./venv/bin/python run_adaptability.py --seeds 0 1 2  # §7 (~70s): adaptability to a NOVEL task family
 ./venv/bin/python run_parametric.py --seeds 0 1 2    # §8 (~25s): parametric abstraction (schema + novel arg)
+./venv/bin/python run_builder.py --seeds 0 1 2       # §9 (~few min): build real apps in Node (needs node on PATH)
 ```
 
 Outputs:
@@ -212,13 +235,20 @@ Outputs:
   inheriting a parametric **schema** (a family + an argument inverter) and binding a
   **novel argument** at eval. Leads with **example output from an actual run** (the
   worked cultured-vs-fresh trace), then the two-budget result table, the
-  argument-binding frontier curve, and honest caveats. **Read this for the newest
-  result.**
-- `figures/` — 24 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
+  argument-binding frontier curve, and honest caveats.
+- **[`BUILDER_FINDINGS.md`](BUILDER_FINDINGS.md)** — the flagship §9 write-up:
+  building real apps from a one-line prompt. Leads with **a real generated app**
+  (the 6-feature `notes` reducer the strongest cultured agent emitted), then the
+  frontier-over-generations table, the fresh-vs-cultured build rates, the
+  accumulation mechanism, and honest limits. **Read this for the newest result.**
+- `output_apps/` — **five real, openable apps** the civilization built (each an
+  `index.html` + assembled reducer): counter, tip_calculator, todo, shopping_cart, notes.
+- `figures/` — 27 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
   generalization-by-depth bars + accumulation curve, the Computer-Use Benchmark
   ladder, the Computer-Use Frontier unlock, the Tier-8 group-by synthesis, the
-  adaptability bars + adaptation curve, and the parametric-abstraction bars +
-  argument-binding frontier).
+  adaptability bars + adaptation curve, the parametric-abstraction bars +
+  argument-binding frontier, and the Builder-World frontier / fresh-vs-cultured /
+  culture-growth).
 - `results/echo_civilization.db` — all raw data (SQLite); `results/generalization.json`
   — the generalization summary; `results/benchmark.json` — the Computer-Use
   Benchmark per-rung solve rates; `results/frontier.json` — the Tier-6/7 frontier
@@ -226,7 +256,8 @@ Outputs:
   synthesised source and a captured run trace; `results/adaptability.json` — the
   §7 adaptability solve rates, budget curves, and worked trace;
   `results/parametric.json` — the §8 parametric-abstraction solve rates, budget
-  curves, and worked trace.
+  curves, and worked trace; `results/builder.json` — the §9 Builder-World frontier
+  and build-rate data, component library, and emitted-app manifest.
 
 ## Design principle
 

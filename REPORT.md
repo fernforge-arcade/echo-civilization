@@ -35,6 +35,7 @@ The same lever operates at every level of abstraction we tested:
 | G | Autonomous firm (runs "forever") | **+426** cumulative profit | **−92** (runs at a loss) |
 | H | **Novel** task family (combinators nobody trained on) | adapts: **0.91** under tight budget | **0.22** (fresh) |
 | I | **Parametric** schema, novel argument bound at eval | **1.00** under tight budget | **0.25** (fresh) |
+| J | **Builds real apps** from a one-line prompt (run in Node) | frontier **climbs to the 6-feature app**; build rate **1.00** | frontier **flat ~4**; 6-feature app **0.07** |
 
 This is the project's thesis in one line: *the limiting resource for hard problems
 is not individual compute but accumulated culture* — and that holds from copying a
@@ -52,9 +53,10 @@ five-letter string to operating a real operating system.
 6. [Scaling up: computer use & autonomy](#6-scaling-up-computer-use--autonomy)
 7. [Adaptability to a novel task family](#7-adaptability-to-a-novel-task-family)
 8. [Parametric abstraction (schema with a free argument)](#8-parametric-abstraction--inheriting-a-schema-with-a-free-argument)
-9. [Conclusions](#9-conclusions)
-10. [Limitations & threats to validity](#10-limitations--threats-to-validity)
-11. [Reproducibility & data](#11-reproducibility--data)
+9. [Building real applications from a one-line prompt](#9-building-real-applications-from-a-one-line-prompt)
+10. [Conclusions](#10-conclusions)
+11. [Limitations & threats to validity](#11-limitations--threats-to-validity)
+12. [Reproducibility & data](#12-reproducibility--data)
 
 ---
 
@@ -801,7 +803,89 @@ ancestors never used.
 
 ---
 
-## 9. Conclusions
+## 9. Building real applications from a one-line prompt
+
+Every world up to here transmitted *transforms* — string ops, shell pipelines,
+parametric schemas. The operator's final steer aimed at what larger models are
+prized for: **take an under-specified task ("build a website that does X") and
+produce a working application.** Experiment J — **Builder World** — does exactly
+that, the same honest way the rest of the project works: **no pretrained model
+anywhere**, agents emit **real JavaScript**, that JavaScript is **executed in Node**
+against hidden behavioural tests, and an app counts as "built" only when every
+requirement passes for real. Full write-up: **`BUILDER_FINDINGS.md`**.
+
+**What it produces.** From five one-line prompts the civilization builds five real,
+openable apps in `output_apps/` — `counter`(3 features), `tip_calculator`(3),
+`todo`(3), `shopping_cart`(4), `notes`(6) — each an `index.html` + assembled
+reducer. Here is the 6-feature frontier app `notes`, *verbatim as the strongest
+cultured agent emitted it* (`output_apps/notes/app.js`):
+
+```js
+function dispatch(action, payload) {
+  switch (action) {
+    case "ADD":    { state.items.push({text: payload, done: false}); break; }
+    case "REMOVE": { state.items.splice(payload, 1); break; }
+    case "EDIT":   { if (state.items[payload.i]) state.items[payload.i].text = payload.text; break; }
+    case "TOGGLE": { if (state.items[payload]) state.items[payload].done = !state.items[payload].done; break; }
+    case "FILTER": { state.filter = payload; break; }
+    case "CLEAR":  { state.items = []; break; }
+  }
+}
+```
+
+No template filled this in — each `case` body is a **component** the agent either
+discovered by running candidate code in Node or recalled from inherited culture,
+and the file exists only because all six behavioural tests passed on this exact code.
+
+**The two mechanisms** are the operator's two hints made literal:
+
+- **Decomposition ("the sub-task thing").** A vague spec is split into **one
+  sub-task per user action**. Each sub-task is "find the handler whose tests pass
+  for THIS behaviour." This turns a **multiplicative** joint search
+  (`|handlers|^features`) into an **additive** one. The same budget that can't touch
+  the joint space comfortably covers the sum of parts.
+- **Culture.** Each solved handler is a reusable named **component** keyed by its
+  action, contributed to a shared library, inherited by later agents, and **tried
+  first**. A cultured agent plugs in an inherited `add_text` for ~1 trial; a fresh
+  agent blind-searches a grid (22 components: 14 real + 8 decoys) per sub-task and,
+  across a multi-feature app under a tight budget, runs out before assembling all.
+
+**Three conditions × seeds 0/1/2, POP=5, GEN=8, BUDGET=40, 3,325 real Node runs.**
+Frontier = max features in a fully-built, test-passing app:
+
+| Condition | Gen 1 → Gen 8 frontier | Result |
+|---|---|---|
+| A — monolithic (no decomp, no culture) | 0 → 0 (flat) | builds **nothing** (joint space ≫ budget) |
+| B — decomposed, no culture | ~4.7 → ~4.7 (flat, noisy) | builds, but frontier **never rises**; fluke-6s evaporate next gen |
+| C — decomposed + culture | 4.7 → **6.0** (climbs, holds) | reaches the **6-feature** ceiling by gen 2 and stays; library 13–14 → **16** |
+
+Per-spec single-agent build rate, **fresh vs. cultured** (budget 40, n=27 each):
+counter **.81→1.00**, tip_calculator **.52→1.00**, todo **.85→1.00**,
+shopping_cart **.33→1.00**, notes **.07→1.00**. The harder the app, the more
+decisive culture is: the 6-feature `notes` is essentially **unbuildable fresh** and
+**always buildable** with an inherited library.
+
+![Builder frontier over generations](figures/25_builder_frontier.png)
+![Fresh vs cultured build rate](figures/26_builder_fresh_vs_cultured.png)
+![Culture size over generations](figures/27_builder_culture_growth.png)
+
+**Why it accumulates.** `notes` shares the action names `ADD/REMOVE/TOGGLE` with
+`todo`; once `todo` is built those components are in the culture and get recalled in
+~1 trial, freeing budget for the three `notes`-specific behaviours (`edit_at`,
+`set_filter`, `clear_items`) a lucky agent discovers once — which then enter culture,
+making every later `notes` build one-shot. **A monolithic** builder never gets that
+far: without decomposition the joint search builds nothing at all. **B** shows
+decomposition makes building *possible* but not *cumulative* — each generation
+restarts from empty, so a fluke-6 never compounds. **C** shows culture makes the
+frontier *climb and hold*. This is the project's thesis one level higher: the
+limiting resource for hard construction is not per-agent compute but accumulated
+culture — generation N ships an app generation 1 could not, because the components
+survived. (Honest limit: the 22-component library is fixed; agents *compose and
+discriminate*, they don't author arbitrary novel files — that frontier is §6.5–6.6.)
+
+---
+
+## 10. Conclusions
 
 1. **Knowledge accumulates culturally — strongly.** With identical per-agent
    budgets, sharing/inheritance conditions reached **96–97 %** hard-task capability
@@ -877,9 +961,21 @@ ancestors never used.
    accumulated unit of knowledge is an abstraction with a slot, and a descendant can
    fill that slot with a value its ancestors never used.
 
+12. **The same law builds real applications from a one-line prompt** (§9). Given
+   vague specs ("build a to-do app") and no pretrained model, agents emit real
+   JavaScript that is *executed in Node* against hidden tests; an app is "built" only
+   when it really passes. Under a fixed build budget the **frontier of buildable apps
+   rises across generations only with decomposition + culture**: a monolithic builder
+   builds nothing (joint search ≫ budget), a decomposed-but-cultureless population
+   plateaus (~4 features, flukes never compound), and a decomposed + cultured
+   population climbs to the **6-feature** ceiling and holds. The hardest app is
+   unbuildable fresh (**0.07**) and always buildable with an inherited component
+   library (**1.00**). The civilization ships five real, openable apps in
+   `output_apps/` — the accumulation thesis demonstrated on app construction itself.
+
 ---
 
-## 10. Limitations & threats to validity
+## 11. Limitations & threats to validity
 
 Honest caveats — this is a research toy, not a finished theory:
 
@@ -906,7 +1002,7 @@ Honest caveats — this is a research toy, not a finished theory:
 
 ---
 
-## 11. Reproducibility & data
+## 12. Reproducibility & data
 
 ```bash
 python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
@@ -918,12 +1014,13 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python run_generalization.py --seeds 0 1 2   # §4.4 generalization test
 ./venv/bin/python run_adaptability.py --seeds 0 1 2     # §7 adaptability to a novel family
 ./venv/bin/python run_parametric.py --seeds 0 1 2       # §8 parametric abstraction (schema + free arg)
+./venv/bin/python run_builder.py --seeds 0 1 2          # §9 Builder World: build real apps in Node (needs node on PATH)
 ```
 
 **Outputs**
 - `RESEARCH_REPORT.md` — this document (human-authored: figures + stats + traces).
 - `research_report.md` — the machine-generated companion (auto-written each run).
-- `figures/01…24_*.png` — all 24 figures embedded above.
+- `figures/01…27_*.png` — all 27 figures embedded above.
 - `results/echo_civilization.db` — **all** raw data in SQLite.
 - `results/benchmark.json` — Computer-Use Benchmark per-rung solve rates (§6.4).
 - `results/frontier.json` — Computer-Use Frontier: Tier-6/7 unlock results (§6.5).
@@ -931,8 +1028,11 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 - `results/adaptability.json` — adaptability solve rates, budget curves & worked trace (§7).
 - `COMPUTER_USE_FRONTIER.md` — the brainstorm→build write-up for §6.5–§6.6.
 - `results/parametric.json` — parametric-abstraction solve rates, budget curves & worked trace (§8).
+- `results/builder.json` — Builder World frontier/build-rate data, library & emitted-app manifest (§9).
+- `output_apps/{counter,tip_calculator,todo,shopping_cart,notes}/` — five real, openable apps the civilization built (§9).
 - `ADAPTABILITY_FINDINGS.md` — the flagship §7 adaptability write-up (leads with run output).
 - `PARAMETRIC_FINDINGS.md` — the flagship §8 parametric-abstraction write-up (leads with run output).
+- `BUILDER_FINDINGS.md` — the flagship §9 Builder-World write-up (leads with a real generated app).
 
 **Database contents (this run):**
 

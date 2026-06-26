@@ -475,3 +475,92 @@ def plot_generalization_curve(curves, path, suite_label="novel depth-3"):
     ax.grid(alpha=0.3)
     ax.legend(title="condition", fontsize=9)
     return _save(fig, path)
+
+
+# ======================================================================
+# Experiment J — Builder World
+# ======================================================================
+
+def plot_builder_frontier(payload, path):
+    """Frontier of buildable apps (max feature_count fully built) vs generation,
+    averaged over seeds, for the three conditions."""
+    curves = payload["curves"]
+    labels = {
+        "A_monolithic": "A  monolithic (no decompose, no culture)",
+        "B_decomposed_no_culture": "B  decomposed, culture wiped each gen",
+        "C_decomposed_culture": "C  decomposed + accumulating culture",
+    }
+    colors = {"A_monolithic": "#bbbbbb",
+              "B_decomposed_no_culture": "#1f77b4",
+              "C_decomposed_culture": "#d62728"}
+    fig, ax = plt.subplots(figsize=(8, 5))
+    for cond in ["A_monolithic", "B_decomposed_no_culture", "C_decomposed_culture"]:
+        fr = curves[cond]["frontier"]
+        ax.plot(range(len(fr)), fr, marker="o", ms=5, lw=2,
+                color=colors[cond], label=labels[cond])
+    maxfc = max(sp["feature_count"] for sp in payload["specs"])
+    ax.axhline(maxfc, ls="--", color="#999", lw=1)
+    ax.text(0.1, maxfc + 0.05, f"hardest app in catalogue ({maxfc} features)",
+            fontsize=8, color="#666")
+    ax.set_title("Builder World: frontier of buildable apps over generations\n"
+                 "(most-complex app a generation can actually build & run; "
+                 "build budget fixed)")
+    ax.set_xlabel("generation")
+    ax.set_ylabel("frontier = max features in a fully-built, test-passing app")
+    ax.set_ylim(-0.2, maxfc + 0.6)
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=8, loc="center right")
+    return _save(fig, path)
+
+
+def plot_builder_fresh_vs_cultured(payload, path):
+    """Per-spec build success: fresh agent vs cultured (full inherited library)."""
+    fvc = payload["fresh_vs_cultured"]
+    names = list(fvc.keys())
+    feats = [fvc[n]["feature_count"] for n in names]
+    fresh = [fvc[n]["fresh"] for n in names]
+    cult = [fvc[n]["cultured"] for n in names]
+    x = np.arange(len(names))
+    w = 0.38
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.bar(x - w / 2, fresh, w, label="fresh (no culture)", color="#1f77b4")
+    ax.bar(x + w / 2, cult, w, label="cultured (inherited library)", color="#d62728")
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{n}\n({f} feat)" for n, f in zip(names, feats)], fontsize=8)
+    ax.set_ylabel(f"build success rate (single agent, budget "
+                  f"{payload['config']['build_budget']})")
+    ax.set_ylim(0, 1.05)
+    ax.set_title("Builder World: a single agent's build rate, fresh vs cultured\n"
+                 "(culture lifts the buildable frontier from ~3 features to all 6)")
+    for xi, v in zip(x - w / 2, fresh):
+        ax.text(xi, v + 0.02, f"{v:.2f}", ha="center", fontsize=7)
+    for xi, v in zip(x + w / 2, cult):
+        ax.text(xi, v + 0.02, f"{v:.2f}", ha="center", fontsize=7)
+    ax.grid(alpha=0.3, axis="y")
+    ax.legend(fontsize=9)
+    return _save(fig, path)
+
+
+def plot_builder_culture_growth(payload, path):
+    """Size of the inherited component library over generations (condition C),
+    with the frontier overlaid to show culture-size driving capability."""
+    curves = payload["curves"]
+    cs = curves["C_decomposed_culture"]["culture_size"]
+    fr = curves["C_decomposed_culture"]["frontier"]
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(range(len(cs)), cs, marker="o", ms=5, lw=2, color="#2ca02c",
+            label="shared component library size")
+    ax.set_xlabel("generation")
+    ax.set_ylabel("# components in shared culture", color="#2ca02c")
+    ax.tick_params(axis="y", labelcolor="#2ca02c")
+    ax.grid(alpha=0.3)
+    ax2 = ax.twinx()
+    ax2.plot(range(len(fr)), fr, marker="s", ms=5, lw=2, ls="--",
+             color="#d62728", label="frontier (features)")
+    ax2.set_ylabel("frontier = max features built", color="#d62728")
+    ax2.tick_params(axis="y", labelcolor="#d62728")
+    ax.set_title("Builder World: accumulating culture lifts the build frontier\n"
+                 "(condition C — library grows, harder apps become buildable)")
+    lines = ax.get_lines() + ax2.get_lines()
+    ax.legend(lines, [l.get_label() for l in lines], fontsize=8, loc="lower right")
+    return _save(fig, path)
