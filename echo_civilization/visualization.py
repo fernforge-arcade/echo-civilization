@@ -344,6 +344,63 @@ def plot_generalization_bars(summary, path):
     return _save(fig, path)
 
 
+_ADAPT_SHORT = dict(SHORT_LABELS, FRESH="FRESH (gen-0)")
+_ADAPT_COLORS = dict(_COND_COLORS, FRESH="#2c3e50")
+
+
+def plot_adaptability_bars(summary, tight_budget, generous_budget, oracle_rate, path):
+    """Grouped bars: per-condition solve rate on the NOVEL combinator family at the
+    TIGHT budget (where culture decides) with a faint generous-budget overlay (the
+    reachable ceiling). Conditions ordered A,B,C,D,FRESH; oracle drawn as a line."""
+    order = ["A_single", "B_population_nosharing", "C_population_memorysharing",
+             "D_full_civilization", "FRESH"]
+    conds = [c for c in order if c in summary]
+    x = np.arange(len(conds))
+    fig, ax = plt.subplots(figsize=(10, 5.5))
+    tight = [summary[c]["tight"][0] for c in conds]
+    tight_sd = [summary[c]["tight"][1] for c in conds]
+    gen = [summary[c]["generous"][0] for c in conds]
+    ax.bar(x, gen, 0.6, color="#d0d3d4", label=f"generous budget ({generous_budget})",
+           zorder=1)
+    ax.bar(x, tight, 0.42, yerr=tight_sd, capsize=4, zorder=2,
+           color=[_ADAPT_COLORS.get(c) for c in conds],
+           label=f"TIGHT budget ({tight_budget})")
+    ax.axhline(oracle_rate, ls="--", color="#8e44ad", lw=1.5,
+               label=f"oracle (knows inner f's): {oracle_rate:.2f}")
+    ax.set_xticks(x)
+    ax.set_xticklabels([_ADAPT_SHORT.get(c, c) for c in conds])
+    ax.set_ylabel("frozen solve rate on NOVEL combinator family")
+    ax.set_ylim(0, 1.05)
+    ax.set_title("Adaptability to a structurally NOVEL task family\n"
+                 "(higher-order combinators nobody trained on; mean ± SD over seeds)")
+    ax.grid(alpha=0.3, axis="y")
+    ax.legend(fontsize=9)
+    return _save(fig, path)
+
+
+def plot_adaptability_curve(curves, path):
+    """Solve rate vs. search budget for the cultured civ (D) vs a FRESH gen-0 agent
+    on the novel family. The gap between the curves IS the inherited-library edge:
+    D climbs to the ceiling far earlier; FRESH needs a far larger budget."""
+    fig, ax = plt.subplots(figsize=(8.5, 5))
+    for name, curve in curves.items():
+        if not curve:
+            continue
+        bs = [b for b, _ in curve]
+        vs = [v for _, v in curve]
+        ax.plot(bs, vs, marker="o", ms=4, label=_ADAPT_SHORT.get(name, name),
+                color=_ADAPT_COLORS.get(name))
+    ax.set_xscale("log")
+    ax.set_xlabel("search budget (consistency checks allowed per task)")
+    ax.set_ylabel("frozen solve rate on novel family")
+    ax.set_ylim(0, 1.05)
+    ax.set_title("Adaptation curve: inherited abstractions move the budget frontier\n"
+                 "(novel combinator family, seed 0)")
+    ax.grid(alpha=0.3, which="both")
+    ax.legend(title="condition", fontsize=9)
+    return _save(fig, path)
+
+
 def plot_generalization_curve(curves, path, suite_label="novel depth-3"):
     """Per-generation frozen solve rate on the held-out suite (seed 0)."""
     fig, ax = plt.subplots(figsize=(8.5, 5))

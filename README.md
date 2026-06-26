@@ -122,6 +122,20 @@ same law holds one rung higher: discovering the structural skeleton costs ~76 re
 executions, recalling it ~16, so at a tight budget the cultured agent clears it
 **100%** of the time and the fresh agent **0%** (reproduced across seeds 0 and 1).
 
+## Adaptability — solving a task family never seen in its entirety
+
+*(§7 / [`ADAPTABILITY_FINDINGS.md`](ADAPTABILITY_FINDINGS.md))* — the sharpest test of
+the central question. The eval family is a set of **higher-order combinators**
+(`map_each`, `map_reversed`, `first_only`, `last_only`, `map_evens`) that decide HOW
+an inner transform is applied across a multi-token string — a structural layer **no
+agent ever trained on**. Because the combinator is novel to *everyone*, it confers no
+inherited edge; the only thing a cultured agent carries is its library of inner
+abstractions. Under a matched tight search budget the cultured civilization **adapts
+(0.91 solve rate)** where a fresh agent **fails (0.22)** — a +0.69 gap that is pure
+inherited-library value (an oracle confirms every task is solvable, and at a generous
+budget both reach 1.00). Knowledge accumulated for one purpose pays off on a problem
+type it was never collected for. Run: `./venv/bin/python run_adaptability.py --seeds 0 1 2`.
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
@@ -146,6 +160,7 @@ python3 -m venv venv
 ./venv/bin/python run_benchmark.py --trials 10 # the Computer-Use Benchmark (~60s): how far up the project ladder?
 ./venv/bin/python run_frontier.py --trials 10  # the Computer-Use Frontier (~2.5min): actually reaching the locked top rungs
 ./venv/bin/python run_tier8.py --trials 10     # Tier 8 (~2min): group-by aggregation, synthesised & really run
+./venv/bin/python run_adaptability.py --seeds 0 1 2  # §7 (~70s): adaptability to a NOVEL task family
 ```
 
 Outputs:
@@ -170,14 +185,21 @@ Outputs:
   write-up of the Tier-8 push (group-by aggregation): leads with **example output
   from an actual run** (the synthesised program + its real stdout on a held-out
   CSV), then the two-budget result table, multi-seed robustness, and honest limits.
-- `figures/` — 20 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
+- **[`ADAPTABILITY_FINDINGS.md`](ADAPTABILITY_FINDINGS.md)** — the flagship §7
+  write-up: adaptability to a structurally **novel** task family (higher-order
+  combinators nobody trained on). Leads with **example output from an actual run**
+  (the worked cultured-vs-fresh trace), then the two-budget result table, the
+  adaptation-vs-budget curve, and honest caveats. **Read this for the newest result.**
+- `figures/` — 22 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
   generalization-by-depth bars + accumulation curve, the Computer-Use Benchmark
-  ladder, the Computer-Use Frontier unlock, and the Tier-8 group-by synthesis).
+  ladder, the Computer-Use Frontier unlock, the Tier-8 group-by synthesis, and the
+  adaptability bars + adaptation curve).
 - `results/echo_civilization.db` — all raw data (SQLite); `results/generalization.json`
   — the generalization summary; `results/benchmark.json` — the Computer-Use
   Benchmark per-rung solve rates; `results/frontier.json` — the Tier-6/7 frontier
   unlock results; `results/tier8.json` — the Tier-8 group-by results plus the
-  synthesised source and a captured run trace.
+  synthesised source and a captured run trace; `results/adaptability.json` — the
+  §7 adaptability solve rates, budget curves, and worked trace.
 
 ## Design principle
 

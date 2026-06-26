@@ -48,9 +48,10 @@ five-letter string to operating a real operating system.
 4. [Results & statistics](#4-results--statistics)
 5. [How culture actually spreads (networks)](#5-how-culture-actually-spreads-networks)
 6. [Scaling up: computer use & autonomy](#6-scaling-up-computer-use--autonomy)
-7. [Conclusions](#7-conclusions)
-8. [Limitations & threats to validity](#8-limitations--threats-to-validity)
-9. [Reproducibility & data](#9-reproducibility--data)
+7. [Adaptability to a novel task family](#7-adaptability-to-a-novel-task-family)
+8. [Conclusions](#8-conclusions)
+9. [Limitations & threats to validity](#9-limitations--threats-to-validity)
+10. [Reproducibility & data](#10-reproducibility--data)
 
 ---
 
@@ -658,7 +659,73 @@ another rung, by mechanism not scale, and culture still decides who clears it.
 
 ---
 
-## 7. Conclusions
+## 7. Adaptability to a novel task family
+
+§4.4 showed culture survives novel *compositions*. But every held-out task there
+was still the same KIND of task the population trained on — apply one program to one
+string. The operator's harder steer: can the civilization adapt to a task type it
+has **never seen in its entirety**? Full write-up: **`ADAPTABILITY_FINDINGS.md`**.
+
+**The novel family — higher-order combinators.** The eval introduces a structural
+layer nobody trained on: a *combinator* `C` that decides HOW an inner transform `f`
+is mapped across a multi-token input (`map_each`, `map_reversed`, `first_only`,
+`last_only`, `map_evens`). Solving a task requires recovering BOTH the combinator
+(novel to everyone) and the inner depth-2 `f`. Because **no agent ever trained on a
+combinator**, the combinator confers no inherited edge — both agent types meet it
+for the first time at eval. The only thing a cultured agent carries is its library
+of inner abstractions `f`. So the test isolates exactly one thing: *does carrying
+accumulated abstractions help you adapt to an unfamiliar problem structure?*
+
+**A worked trace** (strongest cultured agent vs. a fresh gen-0 agent, identical
+tight budget of 45 consistency checks; eval is frozen, query-judged):
+
+```
+TRUE RULE (hidden):  map_reversed(reverse then inc1)
+DEMOS:   'ab gg ed'  -> 'ef hh cb'      'ehf hee'  -> 'ffa gaf'
+         'ccba beh'  -> 'afc bcdd'      ...
+QUERY:   'hfg ef ced' -> 'efd gf hga'   (decides correctness)
+
+CULTURED (D): knows inner abstraction -> hypothesis map_reversed(reverse,inc1)
+              via known=True, 27 checks  -> SOLVED ✓
+FRESH (gen-0): empty library, spends all 45 checks on single-op inner
+               candidates, never reaches the depth-2 inner -> gave up ✗
+```
+
+Same task, same budget; the only difference is the inherited library.
+
+**Results** (frozen solve rate on the 100-task novel family, mean ± SD over seeds
+0/1/2; the oracle that knows the inner `f`'s solves **1.00**, proving every task is
+solvable-in-principle):
+
+| Condition | TIGHT budget (45) | generous budget (4000) | avg known skills |
+|---|---|---|---|
+| A — single agent | 0.55 ± 0.25 | 1.00 | 4.0 |
+| B — population, no sharing | 0.47 ± 0.03 | 1.00 | 3.8 |
+| C — population + sharing | **0.90 ± 0.02** | 1.00 | 15.0 |
+| D — full civilization | **0.91 ± 0.02** | 1.00 | 14.6 |
+| FRESH — gen-0, no accumulation | 0.22 ± 0.00 | 1.00 | 0.0 |
+
+At the generous budget **everyone reaches the ceiling** (the novel combinator is
+findable given enough blind search), so the family is not impossible. But under the
+TIGHT budget, **the inherited library decides adaptation**: best cultured **0.91**
+vs. fresh **0.22**, a **+0.69** gap. (A is a single, high-variance agent that
+happened to accumulate a few abstractions in its own lineage; FRESH is the clean
+zero-accumulation control.) Crucially this is *not* memorization of the new task
+type — nobody saw a combinator — it is the **reuse of old abstractions as building
+blocks inside a new control structure discovered on the spot.**
+
+![Adaptability by condition](figures/21_adaptability_bars.png)
+![Adaptation curve vs budget](figures/22_adaptation_curve.png)
+
+The adaptation curve reframes the gap as a **frontier shift**: the cultured
+civilization reaches the ceiling at a small budget; a fresh agent needs an order of
+magnitude more search to get there. Carrying abstractions moves the budget frontier
+for a problem type the abstractions were never collected for — the strongest form of
+cultural accumulation the project set out to test.
+
+---
+
+## 8. Conclusions
 
 1. **Knowledge accumulates culturally — strongly.** With identical per-agent
    budgets, sharing/inheritance conditions reached **96–97 %** hard-task capability
@@ -714,9 +781,20 @@ another rung, by mechanism not scale, and culture still decides who clears it.
    discover but ~16 to recall. The frontier is not a fixed wall; it moves rung by
    rung as the unlocking abstractions accumulate.
 
+10. **Accumulated abstractions confer ADAPTABILITY to never-before-seen task
+   structures** (§7). On a novel family of higher-order combinators *nobody trained
+   on*, a cultured civilization adapts under a matched tight budget (**0.91** solve
+   rate) where a fresh agent fails (**0.22**) — a +0.69 gap that is pure
+   inherited-library value, since the new control structure is discovered at eval by
+   both. This is the project's central question answered in its strongest form:
+   knowledge accumulated culturally for one purpose pays off on problems it was never
+   collected for. Generation 30 doesn't just redo generation 1's tasks better — it
+   *adapts to problems generation 1 could not have approached*, because the building
+   blocks survived.
+
 ---
 
-## 8. Limitations & threats to validity
+## 9. Limitations & threats to validity
 
 Honest caveats — this is a research toy, not a finished theory:
 
@@ -743,7 +821,7 @@ Honest caveats — this is a research toy, not a finished theory:
 
 ---
 
-## 9. Reproducibility & data
+## 10. Reproducibility & data
 
 ```bash
 python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
@@ -753,17 +831,20 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python run_frontier.py --trials 10    # §6.5 Computer-Use Frontier (~2.5 min)
 ./venv/bin/python run_tier8.py --trials 10       # §6.6 Tier-8 group-by (~2 min)
 ./venv/bin/python run_generalization.py --seeds 0 1 2   # §4.4 generalization test
+./venv/bin/python run_adaptability.py --seeds 0 1 2     # §7 adaptability to a novel family
 ```
 
 **Outputs**
 - `RESEARCH_REPORT.md` — this document (human-authored: figures + stats + traces).
 - `research_report.md` — the machine-generated companion (auto-written each run).
-- `figures/01…20_*.png` — all 20 figures embedded above.
+- `figures/01…22_*.png` — all 22 figures embedded above.
 - `results/echo_civilization.db` — **all** raw data in SQLite.
 - `results/benchmark.json` — Computer-Use Benchmark per-rung solve rates (§6.4).
 - `results/frontier.json` — Computer-Use Frontier: Tier-6/7 unlock results (§6.5).
 - `results/tier8.json` — Tier-8 group-by results + the synthesised source & run trace (§6.6).
+- `results/adaptability.json` — adaptability solve rates, budget curves & worked trace (§7).
 - `COMPUTER_USE_FRONTIER.md` — the brainstorm→build write-up for §6.5–§6.6.
+- `ADAPTABILITY_FINDINGS.md` — the flagship §7 adaptability write-up (leads with run output).
 
 **Database contents (this run):**
 
