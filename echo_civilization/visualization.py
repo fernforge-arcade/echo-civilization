@@ -564,3 +564,106 @@ def plot_builder_culture_growth(payload, path):
     lines = ax.get_lines() + ax2.get_lines()
     ax.legend(lines, [l.get_label() for l in lines], fontsize=8, loc="lower right")
     return _save(fig, path)
+
+
+# ----------------------------------------------------------------------
+# Experiment K — Stack World (full-stack, resilient builder)
+# ----------------------------------------------------------------------
+
+_STACK_ORDER = ["BRITTLE", "RESILIENT", "BRITTLE+CULTURE", "RESILIENT+CULTURE"]
+_STACK_LABELS = {
+    "BRITTLE": "brittle (blind search, no culture)",
+    "RESILIENT": "resilient (repair, no culture)",
+    "BRITTLE+CULTURE": "brittle + culture",
+    "RESILIENT+CULTURE": "resilient + culture",
+}
+_STACK_COLORS = {
+    "BRITTLE": "#bbbbbb",
+    "RESILIENT": "#1f77b4",
+    "BRITTLE+CULTURE": "#ff7f0e",
+    "RESILIENT+CULTURE": "#d62728",
+}
+
+
+def plot_stack_frontier(payload, path):
+    """Frontier (largest full-stack app a generation can fully build & boot, in
+    endpoints) over generations, for all four conditions."""
+    conds = payload["conditions"]
+    fig, ax = plt.subplots(figsize=(8.5, 5))
+    for name in _STACK_ORDER:
+        rows = conds[name]
+        fr = [r["frontier"] for r in rows]
+        ax.plot(range(len(fr)), fr, marker="o", ms=5, lw=2,
+                color=_STACK_COLORS[name], label=_STACK_LABELS[name])
+    maxep = max(sp["endpoints"] for sp in payload["meta"]["specs"])
+    ax.axhline(maxep, ls="--", color="#999", lw=1)
+    ax.text(0.1, maxep + 0.3, f"largest spec ({maxep}-endpoint platform)",
+            fontsize=8, color="#666")
+    ax.set_title("Stack World: frontier of buildable full-stack apps over "
+                 "generations\n(largest app a generation builds so every REST "
+                 "endpoint passes its Node tests)")
+    ax.set_xlabel("generation")
+    ax.set_ylabel("frontier = endpoints in a fully-built, test-passing app")
+    ax.set_ylim(-0.5, maxep + 1.5)
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=8, loc="center right")
+    return _save(fig, path)
+
+
+def plot_stack_reliability(payload, path):
+    """Per-condition reliability: endpoint pass-rate and the fraction of passing
+    endpoints that needed a repair (recovery), at the final generation."""
+    conds = payload["conditions"]
+    names = _STACK_ORDER
+    endpoint_rate = [conds[n][-1]["endpoint_rate"] for n in names]
+    recovery = [conds[n][-1]["recovery_rate"] for n in names]
+    x = np.arange(len(names))
+    w = 0.38
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.bar(x - w / 2, endpoint_rate, w, label="endpoint pass rate",
+           color="#1f77b4")
+    ax.bar(x + w / 2, recovery, w,
+           label="share of passes recovered by repair", color="#2ca02c")
+    ax.set_xticks(x)
+    ax.set_xticklabels([_STACK_LABELS[n] for n in names], fontsize=7.5,
+                       rotation=12, ha="right")
+    ax.set_ylim(0, 1.08)
+    ax.set_ylabel("rate (final generation, averaged over seeds)")
+    ax.set_title("Stack World: per-endpoint reliability and repair-driven "
+                 "recovery\n(resilience lifts the pass rate and recovers "
+                 "near-misses; culture pushes pass rate to 1.0)")
+    for xi, v in zip(x - w / 2, endpoint_rate):
+        ax.text(xi, v + 0.02, f"{v:.2f}", ha="center", fontsize=7)
+    for xi, v in zip(x + w / 2, recovery):
+        ax.text(xi, v + 0.02, f"{v:.2f}", ha="center", fontsize=7)
+    ax.grid(alpha=0.3, axis="y")
+    ax.legend(fontsize=8, loc="upper left")
+    return _save(fig, path)
+
+
+def plot_stack_culture_growth(payload, path):
+    """Endpoint-type vocabulary in shared culture vs the frontier it unlocks
+    (RESILIENT+CULTURE condition)."""
+    rows = payload["conditions"]["RESILIENT+CULTURE"]
+    cs = [r["culture_size"] for r in rows]
+    fr = [r["frontier"] for r in rows]
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(range(len(cs)), cs, marker="o", ms=5, lw=2, color="#2ca02c",
+            label="endpoint types in shared culture")
+    ax.set_xlabel("generation")
+    ax.set_ylabel("# proven endpoint-type configs", color="#2ca02c")
+    ax.tick_params(axis="y", labelcolor="#2ca02c")
+    ax.set_ylim(-0.3, 6)
+    ax.grid(alpha=0.3)
+    ax2 = ax.twinx()
+    ax2.plot(range(len(fr)), fr, marker="s", ms=5, lw=2, ls="--",
+             color="#d62728", label="frontier (endpoints)")
+    ax2.set_ylabel("frontier = max endpoints built", color="#d62728")
+    ax2.tick_params(axis="y", labelcolor="#d62728")
+    ax.set_title("Stack World: a 5-type endpoint vocabulary unlocks unbounded "
+                 "resources\n(once create/list/read/update/delete are proven, "
+                 "every new resource is near-free)")
+    lines = ax.get_lines() + ax2.get_lines()
+    ax.legend(lines, [l.get_label() for l in lines], fontsize=8,
+              loc="center right")
+    return _save(fig, path)

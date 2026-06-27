@@ -1,0 +1,103 @@
+{
+  "task_api": {
+    "built": true,
+    "solved": 5,
+    "endpoints": 5,
+    "boot": {
+      "ok": true,
+      "port": 3211,
+      "resource": "tasks",
+      "steps": [
+        {
+          "req": "POST /tasks",
+          "status": 201,
+          "body": {
+            "id": 1,
+            "title": "hello-from-probe"
+          }
+        },
+        {
+          "req": "GET /tasks",
+          "status": 200,
+          "count": 1
+        }
+      ]
+    }
+  },
+  "blog_api": {
+    "built": true,
+    "solved": 10,
+    "endpoints": 10,
+    "boot": {
+      "ok": true,
+      "port": 3212,
+      "resource": "posts",
+      "steps": [
+        {
+          "req": "POST /posts",
+          "status": 201,
+          "body": {
+            "id": 1,
+            "title": "hello-from-probe",
+            "body": "probe-body"
+          }
+        },
+        {
+          "req": "GET /posts",
+          "status": 200,
+          "count": 1
+        }
+      ]
+    }
+  },
+  "shop_api": {
+    "built": true,
+    "solved": 15,
+    "endpoints": 15,
+    "boot": {
+      "ok": true,
+      "port": 3213,
+      "resource": "users",
+      "steps": [
+        {
+          "req": "POST /users",
+          "status": 201,
+          "body": {
+            "id": 1,
+            "name": "hello-from-probe"
+          }
+        },
+        {
+          "req": "GET /users",
+          "status": 200,
+          "count": 1
+        }
+      ]
+    }
+  },
+  "platform_api": {
+    "built": true,
+    "solved": 20,
+    "endpoints": 20,
+    "boot": {
+      "ok": true,
+      "port": 3214,
+      "resource": "users",
+      "steps": [
+        {
+          "req": "POST /users",
+          "status": 201,
+          "body": {
+            "id": 1,
+            "name": "hello-from-probe"
+          }
+        },
+        {
+          "req": "GET /users",
+          "status": 200,
+          "count": 1
+        }
+      ]
+    }
+  }
+}

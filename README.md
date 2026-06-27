@@ -172,13 +172,52 @@ buildable with an inherited library (**1.00**). The civilization ships **five re
 openable apps** in `output_apps/` (counter, tip calculator, to-do, shopping cart,
 notes). Run: `./venv/bin/python run_builder.py --seeds 0 1 2` (needs `node` on PATH).
 
+## Stack World — building bigger, across the whole dev stack, resiliently
+
+*(§10 / [`STACK_FINDINGS.md`](STACK_FINDINGS.md))* — the operator's steer after Builder
+World: *"they needed a heavy harness and it hardly worked — make the agents more
+resilient and able to actually make bigger projects across the entire dev stack."* So
+the unit of work grows from a single UI handler to a **REST endpoint**, and an "app" is
+now a real multi-file Node project — `db.js`, `validate.js`, `app.js` (router),
+`server.js` (a bootable HTTP server) and `public/index.html` (a fetch frontend). Every
+endpoint is graded by **really running Node**: correct status codes (201/200/404/400/204),
+validation, 404 semantics, persistence across requests. Specs scale from a 5-endpoint
+`task_api` up to a **20-endpoint `platform_api`**.
+
+Two things change versus Builder World. **Resilience**: instead of blind-enumerating
+whole presets (a multiplicative search that exhausts the budget on one bad status flag),
+a resilient agent grades its first candidate once and then **hill-climbs to correct** —
+each handler is a config of independently-tested flags, so a wrong flag is a deterministic
+one-step repair, not a re-roll. **Culture**: the five endpoint *types* (create/list/read/
+update/delete) transfer across resources, so once a population masters the vocabulary it
+scales to new resources for free.
+
+The honest split (seeds 0/1/2, 3666 real Node executions): **culture drives the frontier
+climb** — both cultured conditions jump from ~3 to the full **20-endpoint** platform by
+gen 1 and hold, because a population collectively discovers the 5-type vocabulary
+regardless of repair. **Resilience drives per-agent reliability**: pass rate 0.45→0.61,
+project completion 0.15→0.27, no-culture frontier 3.0→**5.3** (2×), and a **0.97 recovery
+rate** — when a first attempt is wrong the repair loop fixes it, so success is debugging,
+not luck — plus graceful degradation (a partial project still boots). Together they
+reliably ship **20-endpoint, bootable, test-passing full-stack apps**; four of them
+(`task_api`, `blog_api`, `shop_api`, `platform_api`) sit in `output_apps/`, each verified
+to boot and serve real HTTP. Run: `./venv/bin/python run_stack.py --emit --seeds 0 1 2`
+(needs `node` on PATH).
+
+![stack frontier](figures/stack_frontier.png)
+
+![a generated app, booted and serving real HTTP](figures/stack_app.png)
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
 arguments + real code generation, §6.5), **adaptability** to a structurally novel
 task family (§7), **parametric abstraction** — inheriting a schema and binding a
-novel argument (§8), and **Builder World** — building real, runnable apps from a
-one-line prompt via decomposition + an inherited component library (§9). Next: a
+novel argument (§8), **Builder World** — building real, runnable apps from a
+one-line prompt via decomposition + an inherited component library (§9), and **Stack
+World** — building bigger, resilient full-stack Node apps (up to 20 REST endpoints)
+where a repair loop debugs wrong endpoints and culture carries the endpoint vocabulary
+(§10). Next: a
 wider sandboxed shell with agent-proposed sub-tasks; learned grammar weights to reach the harder Tier-7 rungs
 (Flask app, repo refactor); and a deeper autonomous world where agents **propose
 their own goals**, with a multi-firm economy (competition, trade) over truly
@@ -202,6 +241,7 @@ python3 -m venv venv
 ./venv/bin/python run_adaptability.py --seeds 0 1 2  # §7 (~70s): adaptability to a NOVEL task family
 ./venv/bin/python run_parametric.py --seeds 0 1 2    # §8 (~25s): parametric abstraction (schema + novel arg)
 ./venv/bin/python run_builder.py --seeds 0 1 2       # §9 (~few min): build real apps in Node (needs node on PATH)
+./venv/bin/python run_stack.py --emit --seeds 0 1 2  # §10 (~4min): resilient full-stack REST apps in Node (needs node on PATH)
 ```
 
 Outputs:

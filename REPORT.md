@@ -54,9 +54,10 @@ five-letter string to operating a real operating system.
 7. [Adaptability to a novel task family](#7-adaptability-to-a-novel-task-family)
 8. [Parametric abstraction (schema with a free argument)](#8-parametric-abstraction--inheriting-a-schema-with-a-free-argument)
 9. [Building real applications from a one-line prompt](#9-building-real-applications-from-a-one-line-prompt)
-10. [Conclusions](#10-conclusions)
-11. [Limitations & threats to validity](#11-limitations--threats-to-validity)
-12. [Reproducibility & data](#12-reproducibility--data)
+10. [Building bigger: resilient full-stack apps](#10-building-bigger-resilient-full-stack-apps)
+11. [Conclusions](#11-conclusions)
+12. [Limitations & threats to validity](#12-limitations--threats-to-validity)
+13. [Reproducibility & data](#13-reproducibility--data)
 
 ---
 
@@ -885,7 +886,74 @@ discriminate*, they don't author arbitrary novel files — that frontier is §6.
 
 ---
 
-## 10. Conclusions
+## 10. Building bigger: resilient full-stack apps
+
+Builder World (§9) built single-file reducer apps. The operator's last steer pushed
+further: *"they needed a heavy harness and it hardly worked — make the agents more
+resilient and able to actually make bigger projects across the entire dev stack."*
+Experiment K — **Stack World** — answers it. Agents assemble **real multi-file Node
+projects** spanning the whole stack — `db.js` (data) + `validate.js` + `app.js` (HTTP
+router) + `server.js` (a bootable `http` server) + `public/index.html` (a `fetch`
+frontend) + `package.json` — and every grade is a **real `node` execution** against
+hidden behavioural tests. Full write-up: **`STACK_FINDINGS.md`**.
+
+**What it produces.** Four real, bootable backends in `output_apps/` from one-line
+prompts: `task_api` (5 endpoints), `blog_api` (10), `shop_api` (15), `platform_api`
+(20 endpoints across 4 resources). All four **boot and round-trip over real HTTP** —
+`boot_and_probe` starts the server, POSTs a record, GETs it back, confirms it
+persisted (`stack_probes.json`, every `boot_ok: true`). Here is the live `task_api`
+driving its own API in a browser:
+
+![task_api running live](figures/stack_app.png)
+
+**Two mechanisms, two different jobs.** A handler is a config of flags (`create` has
+`status` / `result` / `validate`), each flag pinned by its own hidden test, so a
+defect is one failing test and the repair landscape is smooth.
+
+- **Resilience (repair).** A `BRITTLE` agent blind-enumerates the preset pool per
+  endpoint (multiplicative; the correct config is rare among one-flag-off
+  near-misses). A `RESILIENT` agent grades its first candidate and **hill-climbs
+  single-flag edits to a passing config** (additive), and a partial project still
+  emits and boots.
+- **Culture (typed transfer).** REST endpoints come in five **types**
+  (create/list/read/update/delete) that recur across resources. Proven configs are
+  shared by type and accumulate; a `create` debugged on `tasks` is inherited by
+  `posts`, `users`, `likes`, … and tried first.
+
+**Four conditions × seeds 0/1/2, POP=5, GEN=8, budget=90, repair=45, 3,666 real
+Node runs.** Frontier = largest fully-built, test-passing app (endpoints):
+
+| Condition | Gen 0 → Gen 7 frontier | Result |
+|---|---|---|
+| BRITTLE | 2.3 → 3.0 (flat) | can't even reliably finish the 5-endpoint API |
+| RESILIENT | 4.3 → 5.3 (flat) | finishes small apps every time; bigger out of reach |
+| BRITTLE+CULTURE | 2.3 → **20.0** | climbs to the 20-endpoint platform by gen 1, holds |
+| RESILIENT+CULTURE | 4.3 → **20.0** | climbs to 20 and holds; every agent builds every app |
+
+![Stack frontier over generations](figures/stack_frontier.png)
+![Reliability and recovery](figures/stack_reliability.png)
+![Culture vocabulary unlocks resources](figures/stack_culture_growth.png)
+
+**The honest split.** The frontier climb to 20 is **culture's** doing, not
+resilience's: both cultured conditions reach it, because a *population* discovers the
+five-type vocabulary within a generation whether its members repair or blind-search.
+What resilience buys is **per-agent reliability** — measured at the final generation,
+no culture: endpoint pass rate **0.45 → 0.61**, project completion **0.15 → 0.27**,
+no-culture frontier **3.0 → 5.3**, and the decisive number, **recovery = 0.97** (97%
+of a resilient agent's passing endpoints were reached by *debugging a near-miss*, not
+by guessing right cold). Completion by app size (out of 15 attempts): brittle finishes
+the 5-endpoint API 9/15 and nothing larger; resilient finishes it 15/15 and flukes a
+10-endpoint build 1/15; **resilient+culture builds all four — including the
+20-endpoint platform — 15/15.** Once the vocabulary is inherited the config is right
+first try, so recovery drops back to 0.00: resilience keeps each agent on its feet
+while the vocabulary is still being discovered; culture removes the need for it once
+it is. Neither alone ships the big app reliably; together they do. (Honest limit:
+handlers are configs of preset flags repaired flag-by-flag, not free-form route code;
+the data layer, router, and server are fixed scaffolding.)
+
+---
+
+## 11. Conclusions
 
 1. **Knowledge accumulates culturally — strongly.** With identical per-agent
    budgets, sharing/inheritance conditions reached **96–97 %** hard-task capability
@@ -975,7 +1043,7 @@ discriminate*, they don't author arbitrary novel files — that frontier is §6.
 
 ---
 
-## 11. Limitations & threats to validity
+## 12. Limitations & threats to validity
 
 Honest caveats — this is a research toy, not a finished theory:
 
@@ -1002,7 +1070,7 @@ Honest caveats — this is a research toy, not a finished theory:
 
 ---
 
-## 12. Reproducibility & data
+## 13. Reproducibility & data
 
 ```bash
 python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
