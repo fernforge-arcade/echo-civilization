@@ -10,8 +10,8 @@ __pycache__/
 .pytest_cache/
 
 # generated experiment artifacts (reproducible via run_experiments.py)
+# figures/ are committed so the README renders on GitHub; the DB/results stay out.
 results/
-figures/
 
 # OS
 .DS_Store
