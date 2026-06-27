@@ -13,6 +13,11 @@ README "Stack World" section (§10) added with stack_frontier.png + stack_app.pn
 honest framing; Roadmap + Running list updated. Committed & pushed to main (output_apps/
 stack apps, stack figures, stack.py, run_stack.py, STACK_FINDINGS.md, REPORT §10). results/
 and .cb/ stay git-ignored. NOTHING left on this steer.
+Push: commit 7bf2e92 on main. Auth via URL-embedded token form
+`git push "https://x-access-token:${GITHUB_TOKEN}@github.com/<owner>/echo-civilization.git" main`
+(the bearer extraheader form gives "invalid credentials"). Repo MOVED:
+fernforge/echo-civilization → fernforge-arcade/echo-civilization; origin now points
+at the new URL.
 
 ## (history) ACTIVE STEER (2026-06-27): Experiment K — Stack World (full-stack + resilient)
 Operator: "they needed a heavy harness and it hardly worked — make the agents more
