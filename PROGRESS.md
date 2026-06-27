@@ -8,6 +8,24 @@ steer (DONE): move toward what larger models do — take a vague task ("build a 
 that does X") and actually BUILD a working app, using task decomposition. Ultimate
 goal: agents genuinely capable of building NEW apps. Write up a report.
 
+## Stack World CLI: COMPLETE (2026-06-27)
+Operator steer: "Add a Stack World CLI so I can actually try prompting it to make stuff."
+DONE: `stack_cli.py` (root). Subcommands: build / serve / parse / specs.
+- Deterministic prompt parser (NO model): explicit `noun(field,field)` groups win;
+  KNOWN_RESOURCES vocab gives common nouns default fields; unrecognised plural nouns ->
+  `name`-only resource; empty -> `items`. Built-in spec names (task_api/blog_api/shop_api/
+  platform_api) resolve to the canonical demo specs. Project name derived from resources.
+- build: masters the 5 endpoint types on a scratch spec, then resilient+cultured
+  build_project on the parsed spec, emits real Node project to output_apps/<name>/,
+  prints solved/built/via_culture/via_repair. --boot boot-probes over HTTP. --out/--budget/
+  --repair-budget/--seed/--port flags. serve = build + run `node server.js` foreground.
+- VERIFIED end-to-end: novel prompts (recipes/chefs, guestbook) build 100%, boot, round-trip
+  real HTTP; Playwright screenshot of a CLI-built guestbook renders 3 seeded records; serve
+  smoke-tested with curl POST/GET; platform_api (20 ep) builds+boots by name.
+- README: added "### Prompt it yourself — the Stack World CLI" under §Stack World + a CLI
+  line in the Running block. Committed & pushed to main (see push incantation below).
+NOTHING left on this steer.
+
 ## Experiment K — Stack World: COMPLETE & PUBLISHED (2026-06-27)
 README "Stack World" section (§10) added with stack_frontier.png + stack_app.png and the
 honest framing; Roadmap + Running list updated. Committed & pushed to main (output_apps/

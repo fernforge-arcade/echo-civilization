@@ -208,6 +208,37 @@ to boot and serve real HTTP. Run: `./venv/bin/python run_stack.py --emit --seeds
 
 ![a generated app, booted and serving real HTTP](figures/stack_app.png)
 
+### Prompt it yourself — the Stack World CLI
+
+`stack_cli.py` is the front door to that builder. Type what you want; a fully-cultured
+resilient agent (the strongest condition above) parses your prompt into REST resources,
+synthesises every endpoint — debugging near-misses, reusing endpoint types it has
+mastered — and writes a real, bootable Node project. The prompt parse is deterministic,
+not a model: explicit `noun(field, field)` groups give you exact control, common nouns
+(`posts`, `users`, `products`, `orders`, …) bring sensible default fields, and anything
+unrecognised still becomes a `name`-only resource so every prompt builds something.
+
+```bash
+# build one of the four demo specs by name, or describe your own
+./venv/bin/python stack_cli.py build "a blog with posts(title, body) and comments(text)"
+
+# build AND boot it, round-tripping a record over real HTTP
+./venv/bin/python stack_cli.py build "a store with products(name, price), orders(item)" --boot
+
+# build it and leave the server running so you can open it in a browser
+./venv/bin/python stack_cli.py serve "a guestbook with entries(name, message)"
+
+# inspect what a prompt resolves to, or list the demo specs, without building
+./venv/bin/python stack_cli.py parse "a forum with threads, replies and users"
+./venv/bin/python stack_cli.py specs
+```
+
+A `build` prints what it parsed, how many endpoints it solved (and how many came from
+culture vs repair), writes the project to `output_apps/<name>/`, and tells you how to run
+it. `--boot` starts the server and POSTs-then-GETs a record to prove the live API works.
+`serve` runs `node server.js` in the foreground so you can open `http://localhost:3000`.
+Needs `node` on PATH.
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
@@ -242,6 +273,7 @@ python3 -m venv venv
 ./venv/bin/python run_parametric.py --seeds 0 1 2    # §8 (~25s): parametric abstraction (schema + novel arg)
 ./venv/bin/python run_builder.py --seeds 0 1 2       # §9 (~few min): build real apps in Node (needs node on PATH)
 ./venv/bin/python run_stack.py --emit --seeds 0 1 2  # §10 (~4min): resilient full-stack REST apps in Node (needs node on PATH)
+./venv/bin/python stack_cli.py build "a blog with posts and comments" --boot  # §10 CLI: prompt it to build a real app (needs node on PATH)
 ```
 
 Outputs:
