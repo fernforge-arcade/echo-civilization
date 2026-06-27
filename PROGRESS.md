@@ -8,11 +8,13 @@ steer (DONE): move toward what larger models do — take a vague task ("build a 
 that does X") and actually BUILD a working app, using task decomposition. Ultimate
 goal: agents genuinely capable of building NEW apps. Write up a report.
 
-## Current state — COMPLETE. Exp J Builder World fully built, verified, documented & COMMITTED.
-The whole project (Experiments A–J) is finished and committed on `master`. Builder
-World (Exp J) is the operator's final steer realized: agents emit REAL JS, executed
-in Node vs hidden tests; an app is "built" only if every requirement passes for real.
-Five real openable apps shipped in output_apps/. Reports written. All committed.
+## Current state — COMPLETE & PUBLISHED. Public repo live on GitHub.
+The whole project (Experiments A–J) is finished, committed, and PUBLISHED to a public
+GitHub repo: https://github.com/fernforge/echo-civilization (default branch `main`).
+Local branch was renamed master->main. figures/ are now committed (un-ignored) so the
+README renders on GitHub; results/ (9.5M DB) stays git-ignored. Builder World (Exp J) is
+the operator's final steer realized: agents emit REAL JS, executed in Node vs hidden
+tests; an app is "built" only if every requirement passes. Five openable apps in output_apps/.
 
 Builder canonical numbers (verified): frontier over 8 gens — A monolithic=0 (builds
 nothing); B decomposed/no-culture flat ~4 (flukes never compound); C decomposed+culture
@@ -55,5 +57,6 @@ run_parametric.py / run_builder.py — each `--seeds 0 1 2` or `--trials 10`.
 Flagship doc: REPORT.md (§1–§12). Per-experiment flagships: *_FINDINGS.md.
 
 ## Log
-- 2026-06-26: finished Exp J report (BUILDER_FINDINGS.md + REPORT.md §9/renumber +
-  README), verified numbers & node load, committed. Project complete.
+- 2026-06-26: finished Exp J report; project complete & committed.
+- 2026-06-27: published to public GitHub repo fernforge/echo-civilization (branch main).
+  Committed figures/ (un-ignored). Remote uses token-less URL; auth via $GITHUB_TOKEN.
