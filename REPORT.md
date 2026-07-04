@@ -15,9 +15,10 @@ shown below is acquired from scratch through interaction.
 
 ## Executive summary
 
-We built a complete artificial-civilization laboratory and ran eight experiments
-across seven environments — from reproducing a string up to autonomously running a
-simulated business. One result dominates:
+We built a complete artificial-civilization laboratory and ran a dozen experiments
+across a wide span of environments — from reproducing a five-letter string, up to
+autonomously running a simulated business, out to externally-defined games ending in an
+open-ended Minecraft-style crafting world. One result dominates:
 
 > **Capability accumulates across generations *only* when agents can share and
 > inherit what they discover.** With an identical per-agent problem-solving
@@ -36,10 +37,15 @@ The same lever operates at every level of abstraction we tested:
 | H | **Novel** task family (combinators nobody trained on) | adapts: **0.91** under tight budget | **0.22** (fresh) |
 | I | **Parametric** schema, novel argument bound at eval | **1.00** under tight budget | **0.25** (fresh) |
 | J | **Builds real apps** from a one-line prompt (run in Node) | frontier **climbs to the 6-feature app**; build rate **1.00** | frontier **flat ~4**; 6-feature app **0.07** |
+| L | **External games**, tic-tac-toe → open-ended EchoCraft (§11) | EchoCraft: climbs the tech tree to **depth 8/8**, Crafter **99** | population stuck at **depth ~5.5**, Crafter **~38** |
 
 This is the project's thesis in one line: *the limiting resource for hard problems
 is not individual compute but accumulated culture* — and that holds from copying a
-five-letter string to operating a real operating system.
+five-letter string to operating a real operating system. Experiment L (§11) sharpens
+it with an honest boundary: culture is not a free lunch that grows with difficulty — on
+a board game a lone agent can master in one lifetime, weight-averaged culture even *hurts*.
+Culture wins when a task is too deep to re-solve in one lifetime **and** its knowledge
+transmits without loss — which is exactly the open-ended EchoCraft endpoint.
 
 ---
 
@@ -55,9 +61,10 @@ five-letter string to operating a real operating system.
 8. [Parametric abstraction (schema with a free argument)](#8-parametric-abstraction--inheriting-a-schema-with-a-free-argument)
 9. [Building real applications from a one-line prompt](#9-building-real-applications-from-a-one-line-prompt)
 10. [Building bigger: resilient full-stack apps](#10-building-bigger-resilient-full-stack-apps)
-11. [Conclusions](#11-conclusions)
-12. [Limitations & threats to validity](#12-limitations--threats-to-validity)
-13. [Reproducibility & data](#13-reproducibility--data)
+11. [Game World: culture across a difficulty ladder](#11-game-world-culture-across-a-difficulty-ladder)
+12. [Conclusions](#12-conclusions)
+13. [Limitations & threats to validity](#13-limitations--threats-to-validity)
+14. [Reproducibility & data](#14-reproducibility--data)
 
 ---
 
@@ -953,7 +960,95 @@ the data layer, router, and server are fixed scaffolding.)
 
 ---
 
-## 11. Conclusions
+## 11. Game World: culture across a difficulty ladder
+
+Everything up to here lives in worlds this project designed. A fair question is whether
+the civilization effect survives contact with *externally-defined* games — tasks with
+their own rules and their own difficulty, graded by an opponent or an achievement list
+rather than by us. Experiment L (`echo_civilization/games/`, `run_games.py`) runs the
+same three-condition ablation on a four-rung ladder of rising open-endedness, and the
+result is more interesting than a clean upward line.
+
+### The ladder and the conditions
+
+Four games, ordered by game-tree complexity (log₁₀ from the RL literature):
+
+| Rung | Game | cx | Learner | Culture = |
+|---|---|---|---|---|
+| 1 | Tic-Tac-Toe (solved) | ≈5 | tabular MC-control self-play | shared state→move answer-book |
+| 2 | Connect Four 6×5, win-4 | ≈21 | linear TD on afterstate features | averaged weight vector |
+| 3 | Los Alamos minichess 6×6 (the 1956 first chess program) | ≈60 | linear eval + depth-2 α-β, TD-leaf vs a material engine | averaged eval weights |
+| 4 | **EchoCraft** — Crafter/Minecraft-style survival + 13-achievement tech tree | open-ended (≈100) | macro-options + tabular Q over abstract inventory state | **discovered recipe set** |
+
+No pretrained anything — numpy and stdlib, the same as the rest of the project. Three
+matched-budget conditions: **SOLO** (one lifelong learner), **POP** (a population, each
+learning alone, no sharing), **CIV** (population + cultural contribution + inheritance,
+with full generational turnover so knowledge either transmits or dies). Run over seeds
+0/1/2. Capability is rung-specific (result vs a perfect/heuristic opponent for the board
+games; Crafter score and tech depth for EchoCraft).
+
+### The headline: culture's payoff is *not* monotone in complexity
+
+![culture advantage per rung](figures/games_culture_advantage.png)
+
+Final culture advantage (CIV − POP capability): Tic-Tac-Toe **+0.208**, Connect Four
+**−0.128**, minichess **+0.061**, EchoCraft **+0.197**. Connect Four — more complex than
+Tic-Tac-Toe by any tree-size measure — is where culture *hurts*. That is the finding, not
+a bug. Two variables, not raw complexity, decide whether culture pays:
+
+1. **Is the skill re-discoverable within one lifetime budget?** Connect Four is: a lone
+   agent reaches ~0.89 vs a heuristic within a single generation's 90 episodes, so
+   mortality never bites and POP does fine on its own. Tic-Tac-Toe under a tight MC
+   budget is *not* fully re-mastered each lifetime, so pooling the answer-book across the
+   population helps. EchoCraft's deep tech tree is nowhere near re-discoverable in a
+   lifetime.
+2. **Is culture stored losslessly?** Connect Four and minichess share culture by
+   *averaging continuous weight vectors* — averaging two competent-but-different linear
+   policies produces a worse one, so CIV drags behind the best solo learner. EchoCraft
+   shares a *discrete recipe set*; a union of discoveries only ever adds. When culture is
+   lossy, more of it is worse; when it is lossless, more of it compounds.
+
+EchoCraft is the one rung where both align (deep tree + lossless recipes), and it is
+where culture wins decisively — which is exactly the open-ended endpoint the steer asked
+for.
+
+### The money result: EchoCraft
+
+![EchoCraft depth and score over generations](figures/games_echocraft_depth.png)
+
+EchoCraft's 13 achievements form a dependency tree of depth 0→8 (wood → table →
+wood-pickaxe → stone → furnace/stone-pickaxe → coal/iron → smelt → iron-pickaxe →
+diamond). The craftable steps (orange) are the inheritable cultural unit: a recipe is
+hard to invent (tinkering discovers it with low probability, and only once you've gathered
+its ingredients — which needs every shallower recipe already known), but trivial to copy.
+
+![EchoCraft tech tree](figures/games_techtree.png)
+
+Across ten generations the best CIV agent climbs from tech-depth 5.3 to **8.0 — the
+bottom of the tree — and stays there**, with Crafter score rising 33 → **99** and
+achievements 9.2 → 12.9. The no-sharing population stays flat: depth ~5.5, score ~38,
+achievements ~9, generation after generation. A single lifelong SOLO learner does better
+than POP (it accumulates within one long life, reaching depth ~7.3) but never reaches the
+bottom and collapses when its one run gets an unlucky map. Only CIV, inheriting the
+recipe set, reliably mines the whole tree: **generation N reaches a tech depth generation
+1 and the isolated population provably never reach, because the recipes accumulated
+culturally.** That is the project's thesis, reproduced in an open-ended game world graded
+by its own achievement list.
+
+![per-rung learning curves](figures/games_learning_curves.png)
+
+### What this rung adds to the overall claim
+
+The designed worlds (§3–§10) show *that* culture accumulates. Game World shows *when* it
+does: culture is not a free lunch that grows with difficulty — it is the mechanism that
+wins precisely when a task is too deep to re-solve in one lifetime *and* its knowledge can
+be transmitted without loss. Board games with lifetime-learnable tactics and lossy
+weight-averaging don't need it (and can be hurt by it); an open-ended crafting world with
+a deep, discrete tech tree can only be finished by it.
+
+---
+
+## 12. Conclusions
 
 1. **Knowledge accumulates culturally — strongly.** With identical per-agent
    budgets, sharing/inheritance conditions reached **96–97 %** hard-task capability
@@ -1043,7 +1138,7 @@ the data layer, router, and server are fixed scaffolding.)
 
 ---
 
-## 12. Limitations & threats to validity
+## 13. Limitations & threats to validity
 
 Honest caveats — this is a research toy, not a finished theory:
 
@@ -1070,7 +1165,7 @@ Honest caveats — this is a research toy, not a finished theory:
 
 ---
 
-## 13. Reproducibility & data
+## 14. Reproducibility & data
 
 ```bash
 python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
@@ -1083,12 +1178,14 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python run_adaptability.py --seeds 0 1 2     # §7 adaptability to a novel family
 ./venv/bin/python run_parametric.py --seeds 0 1 2       # §8 parametric abstraction (schema + free arg)
 ./venv/bin/python run_builder.py --seeds 0 1 2          # §9 Builder World: build real apps in Node (needs node on PATH)
+./venv/bin/python run_games.py --seeds 0 1 2            # §11 Game World ladder: TTT → Connect4 → minichess → EchoCraft (~several min)
+./venv/bin/python gen_games_figures.py                 # §11 figures (reads results/games.json)
 ```
 
 **Outputs**
 - `RESEARCH_REPORT.md` — this document (human-authored: figures + stats + traces).
 - `research_report.md` — the machine-generated companion (auto-written each run).
-- `figures/01…27_*.png` — all 27 figures embedded above.
+- `figures/01…27_*.png` and `figures/games_*.png` — every figure embedded above.
 - `results/echo_civilization.db` — **all** raw data in SQLite.
 - `results/benchmark.json` — Computer-Use Benchmark per-rung solve rates (§6.4).
 - `results/frontier.json` — Computer-Use Frontier: Tier-6/7 unlock results (§6.5).
@@ -1101,6 +1198,9 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 - `ADAPTABILITY_FINDINGS.md` — the flagship §7 adaptability write-up (leads with run output).
 - `PARAMETRIC_FINDINGS.md` — the flagship §8 parametric-abstraction write-up (leads with run output).
 - `BUILDER_FINDINGS.md` — the flagship §9 Builder-World write-up (leads with a real generated app).
+- `results/games.json` — §11 Game World ladder: per-rung, per-condition learning curves + EchoCraft tech-depth/recipe/Crafter extras.
+- `GAMES_FINDINGS.md` — the flagship §11 Game-World write-up. `GAMES_PLAN.md` — the pre-registered plan.
+- `figures/games_*.png` — the four §11 figures (learning curves, tech tree, EchoCraft depth, culture-advantage bars).
 
 **Database contents (this run):**
 

@@ -239,6 +239,36 @@ it. `--boot` starts the server and POSTs-then-GETs a record to prove the live AP
 `serve` runs `node server.js` in the foreground so you can open `http://localhost:3000`.
 Needs `node` on PATH.
 
+## Game World — culture across a difficulty ladder
+
+*(§11 / [`GAMES_FINDINGS.md`](GAMES_FINDINGS.md), plan in [`GAMES_PLAN.md`](GAMES_PLAN.md))* —
+the operator's steer after Stack World: push toward externally-defined tasks by starting
+with games and climbing toward open-ended ones. Four rungs — Tic-Tac-Toe → Connect Four →
+Los Alamos minichess → **EchoCraft**, a Crafter/Minecraft-style survival world with a
+13-step tech tree — each run under SOLO / POP / CIV, three matched-budget conditions. Still
+pure numpy + stdlib, no pretrained models.
+
+The headline is deliberately not a clean line. Culture's advantage (CIV − POP) is **+0.208,
+−0.128, +0.061, +0.197** across the rungs — Connect Four, *more* complex than Tic-Tac-Toe,
+is where culture *hurts*. Two things decide whether culture pays: whether the skill is
+re-discoverable in one lifetime (Connect Four is, so a lone agent needs no help), and
+whether culture is stored losslessly (averaged weight vectors degrade; a discrete recipe
+set only adds). In **EchoCraft**, where both align, culture wins decisively: over ten
+generations a civilization that inherits recipes climbs the tech tree from depth 5.3 to
+**8.0 — the bottom** — with Crafter score 33 → **99**, while the no-sharing population stays
+flat at depth ~5.5. Generation N finishes a tech tree generation 1 provably could not,
+because recipes accumulated culturally.
+
+```bash
+./venv/bin/python run_games.py --seeds 0 1 2   # full ladder → results/games.json
+./venv/bin/python run_games.py --quick         # fast smoke
+./venv/bin/python run_games.py --rung echocraft --seeds 0 1 2   # one rung
+./venv/bin/python gen_games_figures.py         # the four figures
+```
+
+Figures: `figures/games_culture_advantage.png` (the headline), `games_echocraft_depth.png`
+(the money result), `games_techtree.png`, `games_learning_curves.png`.
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
@@ -274,6 +304,7 @@ python3 -m venv venv
 ./venv/bin/python run_builder.py --seeds 0 1 2       # §9 (~few min): build real apps in Node (needs node on PATH)
 ./venv/bin/python run_stack.py --emit --seeds 0 1 2  # §10 (~4min): resilient full-stack REST apps in Node (needs node on PATH)
 ./venv/bin/python stack_cli.py build "a blog with posts and comments" --boot  # §10 CLI: prompt it to build a real app (needs node on PATH)
+./venv/bin/python run_games.py --seeds 0 1 2         # §11 (~several min): Game World ladder, TTT → EchoCraft
 ```
 
 Outputs:
