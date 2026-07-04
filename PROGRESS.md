@@ -7,7 +7,13 @@ generations through a civilization-like process? Experiments A–K are COMPLETE 
 (GitHub fernforge-arcade/echo-civilization, main). REPORT.md is the flagship (§1–§13); don't
 touch the delicate tuning of A–K.
 
-## Current state — Experiment L (Game World ladder): RUN DONE, results in hand
+## Current state — Experiment L (Game World ladder): COMPLETE & PUBLISHED
+DONE 2026-07-04: figures (figures/games_*.png), GAMES_FINDINGS.md, REPORT.md §11 (renumbered
+Conclusions/Limitations/Repro → §12/13/14), README Game World section. Committed b965994 and
+PUSHED to fernforge-arcade/echo-civilization main. Nothing outstanding for Experiment L.
+Below is the result record (kept for reference); "What's left" is now empty.
+
+## Result record — Game World ladder
 Operator steer: push toward usefulness via games (tic-tac-toe → chess-like → open-ended RPG/
 Minecraft); test culture on increasingly open-ended/noisy environments; report honestly.
 Plan in `GAMES_PLAN.md`. Four rungs under `echo_civilization/games/` all built, tested, and
@@ -33,19 +39,13 @@ re-discoverable within ONE lifetime budget, and (2) whether culture is stored LO
     SOLO max_depth →7.3, crafter ~77 (lifelong solo gets close but never reaches depth 8)
   => generation N reaches tech depth gen 1 / the no-sharing population never reach. The thesis.
 
-## What's left (finish these, then done)
-1. `gen_games_figures.py` → figures/11_*.png: (a) 2x2 per-rung SOLO/POP/CIV mean-score learning
-   curves w/ std bands; (b) EchoCraft tech-tree DAG (networkx, ACHIEVEMENTS depth/recipe from
-   craft.py); (c) EchoCraft max_depth vs generation (CIV rising, POP flat, SOLO mid); (d)
-   HEADLINE bars: culture_advantage (CIV−POP) per rung + annotate the "lifetime-rediscoverable
-   & lossless-culture" framing. Commit PNGs (figures/ is un-ignored).
-2. `GAMES_FINDINGS.md` flagship writeup + REPORT.md new `## 11. Game World` section (renumber
-   old §11 Conclusions→§12, §12 Limitations→§13, etc; fix ToC) + README "Game World" section.
-3. git add + commit (Co-Authored-By line) + push to fernforge-arcade/echo-civilization main.
+## What's left
+Nothing for Experiment L — shipped. Possible FUTURE directions if the operator steers again:
+harder rungs (real minichess opening book / lossless board-game culture to flip connect4's
+sign), or a larger EchoCraft map. Not started; no action pending.
 
 ## Next concrete step
-Write `gen_games_figures.py` (reads results/games.json + imports craft.ACHIEVEMENTS), run it,
-eyeball the 4 PNGs, then write GAMES_FINDINGS.md.
+None pending. Await operator steer.
 
 ## Key decisions & why
 - Self-contained under games/ so A–K tuning untouched. Reuse the culture pattern, not classes.
