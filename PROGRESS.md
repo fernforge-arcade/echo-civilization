@@ -39,13 +39,20 @@ re-discoverable within ONE lifetime budget, and (2) whether culture is stored LO
     SOLO max_depth →7.3, crafter ~77 (lifelong solo gets close but never reaches depth 8)
   => generation N reaches tech depth gen 1 / the no-sharing population never reach. The thesis.
 
-## What's left
-Nothing for Experiment L — shipped. Possible FUTURE directions if the operator steers again:
-harder rungs (real minichess opening book / lossless board-game culture to flip connect4's
-sign), or a larger EchoCraft map. Not started; no action pending.
+## Gameplay animations steer — COMPLETE & PUBLISHED (2026-07-05)
+Operator asked for videos/flowcharts of REAL gameplay in the Experiment L report. Done:
+`gen_games_animations.py` records one greedy game per rung (agents trained with the exact
+ladder code, no pretrained anything; matplotlib frames → PIL → looping GIF). All 4 GIFs
+verified valid and committed + pushed (commit f8f856b, fernforge-arcade/echo-civilization main):
+- figures/games_play_tictactoe.gif — culture-born agent holds a DRAW vs perfect play
+- figures/games_play_connect4.gif — TD evaluator connects four vs heuristic
+- figures/games_play_minichess.gif — depth-2 searcher, +material margin vs engine
+- figures/games_play_echocraft.gif — civilization-born child walks the tech tree (24 frames)
+REPORT.md has the "### Watch the agents play" subsection linking all 4. Nothing outstanding.
 
-## Next concrete step
-None pending. Await operator steer.
+## Next concrete step (on resume)
+None — whole task (Experiments A–L + gameplay animations) is complete and published.
+OPTIONAL only: a one-line echocraft GIF mention in README/GAMES_FINDINGS.md (low priority).
 
 ## Key decisions & why
 - Self-contained under games/ so A–K tuning untouched. Reuse the culture pattern, not classes.
