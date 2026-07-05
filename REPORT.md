@@ -987,6 +987,30 @@ with full generational turnover so knowledge either transmits or dies). Run over
 0/1/2. Capability is rung-specific (result vs a perfect/heuristic opponent for the board
 games; Crafter score and tech depth for EchoCraft).
 
+### Watch the agents play
+
+The metrics below summarise thousands of games; these clips are single representative games,
+each played greedily by an agent trained with the exact code the experiment uses (`gen_games_animations.py`).
+No pretrained anything — the same numpy self-play learners as the rest of the ladder.
+
+| Rung | Gameplay |
+|---|---|
+| Tic-Tac-Toe | ![tic-tac-toe gameplay](figures/games_play_tictactoe.gif) |
+| Connect Four | ![connect four gameplay](figures/games_play_connect4.gif) |
+| Los Alamos minichess | ![minichess gameplay](figures/games_play_minichess.gif) |
+| **EchoCraft** | ![echocraft gameplay](figures/games_play_echocraft.gif) |
+
+Tic-Tac-Toe shows a *culture-born* agent (it inherited the population's pooled answer book)
+holding a draw against perfect minimax play — the best result anyone can get, and one a lone
+agent doesn't reach under this budget. Connect Four is a TD-learned linear evaluator connecting
+four against the 1-ply heuristic. Minichess is the depth-2 searcher grinding a positive material
+margin out of the material engine. The EchoCraft clip is the one that matters: a child born into
+the civilization's recipe set walks the tech tree — gather wood, place a table, craft a
+wood pickaxe, mine stone, build a furnace, smelt iron, and on down toward diamond — with the
+achievement checklist and tech depth ticking up on the right. That walk is only possible because
+the recipes were discovered by earlier generations and inherited; a fresh solo agent stalls
+part-way up the same tree.
+
 ### The headline: culture's payoff is *not* monotone in complexity
 
 ![culture advantage per rung](figures/games_culture_advantage.png)
