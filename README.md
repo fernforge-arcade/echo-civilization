@@ -269,6 +269,28 @@ because recipes accumulated culturally.
 Figures: `figures/games_culture_advantage.png` (the headline), `games_echocraft_depth.png`
 (the money result), `games_techtree.png`, `games_learning_curves.png`.
 
+## Real, LLM-priced work — data wrangling for ~$0 a column
+
+*(§11b / [`ECHOFILL_FINDINGS.md`](ECHOFILL_FINDINGS.md))* — the operator's steer after
+Game World: point the civilization at work people pay an LLM to do per row. The task is
+few-shot column transforms (`john@acme.com => acme`): infer a deterministic rule from two
+or three examples, apply it to a whole column. Three arms on the same held-out suite — a
+**naive** agent, a **cultured** agent (inherited the pieces the population discovered on
+training tasks), and a **real LLM** baseline (Haiku 4.5, cost from token accounting).
+
+Cultured solves **6/6** held-out tasks, naive **3/6**: the three misses all need two chained
+parametric ops, which the from-scratch search provably can't compose, but the cultured agent
+reaches by **recombining** two inherited pieces. 100% vs 46% row accuracy, at ~530 ns/row and
+**$0** vs ~**$13 per 100k rows** for the LLM. Program-by-example itself isn't new (FlashFill,
+PROSE); what's new is the civilization result — the reachable set *grows* with the accumulated
+library, same synthesiser and budget, and the rules are deterministic and free at inference.
+
+```bash
+./venv/bin/python run_echofill.py            # the 3-arm benchmark → results/echofill_bench.json
+./venv/bin/python gen_echofill_figures.py    # figures 28, 29
+./venv/bin/python echofill_cli.py --demo     # try the tool
+```
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command

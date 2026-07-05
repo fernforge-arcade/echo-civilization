@@ -1,79 +1,70 @@
 # Echo Civilization — Progress
 
 ## Goal
-Research sim: can a population of simple learning agents (NO pretrained LLMs; pure Python +
-numpy + sqlite3 + matplotlib + networkx) accumulate knowledge and become more capable over
-generations through a civilization-like process? Experiments A–K are COMPLETE & PUBLISHED
-(GitHub fernforge-arcade/echo-civilization, main). REPORT.md is the flagship (§1–§13); don't
-touch the delicate tuning of A–K.
+Research sim: can simple learning agents accumulate knowledge over generations via a
+civilization process? (NO pretrained LLMs; numpy + stdlib only.) Experiments A–L COMPLETE &
+PUBLISHED (GitHub fernforge-arcade/echo-civilization, main). REPORT.md is the flagship.
+Don't touch the delicate tuning of A–L.
 
-## Current state — Experiment L (Game World ladder): COMPLETE & PUBLISHED
-DONE 2026-07-04: figures (figures/games_*.png), GAMES_FINDINGS.md, REPORT.md §11 (renumbered
-Conclusions/Limitations/Repro → §12/13/14), README Game World section. Committed b965994 and
-PUSHED to fernforge-arcade/echo-civilization main. Nothing outstanding for Experiment L.
-Below is the result record (kept for reference); "What's left" is now empty.
+## CURRENT STEER (2026-07-05): agents do REAL LLM-work cheaper, USING OUR RESEARCH — DONE
+Operator: "push agents into useful stuff, a lot cheaper, using OUR research (the evolved
+civilization + accumulated culture), not a random unrelated tool." Plus: "make the final
+report show *why* this is actually new and not something that already exists."
 
-## Result record — Game World ladder
-Operator steer: push toward usefulness via games (tic-tac-toe → chess-like → open-ended RPG/
-Minecraft); test culture on increasingly open-ended/noisy environments; report honestly.
-Plan in `GAMES_PLAN.md`. Four rungs under `echo_civilization/games/` all built, tested, and
-run for real (seeds 0,1,2). `results/games.json` (42KB) is COMPLETE. Runner `run_games.py`.
+## Current state — EXPERIMENT §11b BUILT, TESTED, WIRED IN. Ready to commit/push.
+The "echofill" wrangling experiment is complete and self-contained (does NOT touch A–L):
+- `echo_civilization/echofill.py` — synthesis engine (staged search + FlashFill-style arg
+  induction). Public API: learn(examples)->Rule; Rule.apply/apply_column/describe.
+- `echo_civilization/echofill_civ.py` — the CIVILIZATION wiring: EchofillAgent with
+  recall→recombine→modify→discover solve loop + WrangleCulture (shared skill library). This
+  is what makes it "the agents/culture doing it", mirroring agent.solve_task/synthesis.py.
+- `echo_civilization/wrangle_suite.py` — TRAIN tasks (culture builds from these) + HELDOUT
+  (composites = concat of two train pieces; + single-op controls).
+- `run_echofill.py` — 3 arms on same held-out suite: naive / cultured / real-LLM(Haiku 4.5
+  cost model). RESULT: cultured 6/6, naive 3/6; 100% vs 46% row acc; ~530 ns/row, $0 vs
+  ~$13/100k rows. Writes results/echofill_bench.json.
+- `gen_echofill_figures.py` — figures/28_echofill_arms.png, 29_echofill_cost.png (regen'd).
+- `echofill_cli.py` — CLI (--ex "in=>out" repeatable, --csv/--col or stdin, --demo). Works.
+- `ECHOFILL_FINDINGS.md` — full write-up incl. HONEST "Is this actually new?" section
+  (FlashFill/PROSE exist; novelty = the civilization/cultural-accumulation result + $0
+  deterministic inference). Named ceiling honestly.
+- REPORT.md §11b + README section added, both link ECHOFILL_FINDINGS.md and show the table.
 
-FINAL numbers (culture_advantage = CIV−POP final_mean; also see per-gen curves in json):
-- tictactoe   cx5   SOLO .704  POP .349  CIV .557  → adv +0.208 (SOLO lifelong is ceiling)
-- connect4    cx21  SOLO .706  POP .891  CIV .763  → adv −0.128 (COUNTEREXAMPLE, see below)
-- minichess   cx60  SOLO .323  POP .333  CIV .395  → adv +0.061 (modest/noisy middle rung)
-- echocraft   cx100 SOLO .758  POP .656  CIV .854  → adv +0.197 (HEADLINE)
+KEY HONEST MECHANISM (the "why it's new + why culture matters"): naive from-scratch search
+provably CANNOT compose two parametric ops (e.g. split '@' then split '.'), halts after ~820
+candidates → composites fail. Cultured agent inherited the two single-op pieces and solves by
+RECOMBINING them. Same synthesiser+budget; only difference is the inherited library.
 
-THE FINDING (honest, richer than a monotone line — report this): culture's payoff is NOT a
-simple function of game-tree complexity. It is governed by (1) whether the skill is
-re-discoverable within ONE lifetime budget, and (2) whether culture is stored LOSSLESSLY.
-- connect4 is the instructive counterexample: a lone agent masters it in one lifetime AND its
-  culture = averaged weight vector (lossy, averaging continuous policies degrades them) → POP
-  beats CIV.
-- echocraft is where both align: deep tech tree NOT re-discoverable in a lifetime + culture =
-  discrete recipe SET (lossless union) → CIV climbs the tree over generations and POP stays
-  flat. Money result (from json extras, CIV vs POP across 10 gens):
-    CIV  max_depth 5.3→8.0 (bottom of tree), crafter 33→99, achievements 9.2→12.9
-    POP  max_depth ~5.5 FLAT, crafter ~33→42 FLAT, achievements ~9 FLAT
-    SOLO max_depth →7.3, crafter ~77 (lifelong solo gets close but never reaches depth 8)
-  => generation N reaches tech depth gen 1 / the no-sharing population never reach. The thesis.
+## What is left (in order)
+1. COMMIT + PUSH everything (see Gotchas for the push URL). New/changed files:
+   echo_civilization/{echofill.py(untracked),echofill_civ.py,wrangle_suite.py},
+   run_echofill.py, gen_echofill_figures.py, echofill_cli.py, ECHOFILL_FINDINGS.md,
+   figures/28_echofill_arms.png, figures/29_echofill_cost.png, REPORT.md, README.md,
+   PROGRESS.md. (results/ is git-ignored — fine.)
+2. (optional polish) eyeball figures/29 once; verify links render. Nothing blocking.
 
-## Gameplay animations steer — COMPLETE & PUBLISHED (2026-07-05)
-Operator asked for videos/flowcharts of REAL gameplay in the Experiment L report. Done:
-`gen_games_animations.py` records one greedy game per rung (agents trained with the exact
-ladder code, no pretrained anything; matplotlib frames → PIL → looping GIF). All 4 GIFs
-verified valid and committed + pushed (commit f8f856b, fernforge-arcade/echo-civilization main):
-- figures/games_play_tictactoe.gif — culture-born agent holds a DRAW vs perfect play
-- figures/games_play_connect4.gif — TD evaluator connects four vs heuristic
-- figures/games_play_minichess.gif — depth-2 searcher, +material margin vs engine
-- figures/games_play_echocraft.gif — civilization-born child walks the tech tree (24 frames)
-REPORT.md has the "### Watch the agents play" subsection linking all 4. Nothing outstanding.
-
-## Next concrete step (on resume)
-None — whole task (Experiments A–L + gameplay animations) is complete and published.
-OPTIONAL only: a one-line echocraft GIF mention in README/GAMES_FINDINGS.md (low priority).
+## Next concrete step
+Run: `cd /home/node/workspace && git add -A && git commit` with a clear message, then push
+via the tokenized URL in Gotchas. Then the steer is DONE — post a cb note summarizing.
 
 ## Key decisions & why
-- Self-contained under games/ so A–K tuning untouched. Reuse the culture pattern, not classes.
-- Report the NON-monotone result honestly (operator asked for honesty + best judgement). The
-  connect4 negative is a feature, not a bug: it isolates WHEN culture helps.
-- civ ablation needs generational MORTALITY (renew_pop=True): POP children born naive → knowledge
-  dies with them → POP flat; CIV children inherit culture → ratchet. run_games passes it to all.
-- No pretrained models; numpy + stdlib only.
+- Reused the civilization PATTERN (recall→recombine→modify→discover + shared culture) via a
+  NEW self-contained module, not by editing A–L classes → no regression risk.
+- Held-out composites are genuine capability gaps (param+param unreachable from scratch), not
+  budget artefacts — budget 2000, search self-halts at ~820. This is the honest core.
+- LLM cost is ESTIMATED (no API key in sandbox): credited 100% acc, cost from 90-in/8-out
+  tok/row @ Haiku 4.5 $1/$5 per 1M. Stated as estimate in the report.
 
 ## Gotchas
-- Use `./venv/bin/python` (both venv/ and .venv/ exist; venv/ is real).
-- Case-INSENSITIVE bind-mount: REPORT.md is the flagship; don't create a name that clashes on
-  lowercase (RESEARCH_REPORT.md == research_report.md).
+- Use `./venv/bin/python`. Case-INSENSITIVE bind-mount: don't collide names on lowercase.
 - Git: `git config --global --add safe.directory /home/node/workspace` on fresh container.
   Push: `git push "https://x-access-token:${GITHUB_TOKEN}@github.com/fernforge-arcade/echo-civilization.git" main`.
   figures/ un-ignored (commit PNGs); results/ git-ignored. End commit msgs w/ Co-Authored-By: Claude Opus 4.8.
 
 ## How to run / test
-Game ladder: `./venv/bin/python run_games.py --seeds 0 1 2` (--quick for smoke, --rung NAME to
-isolate) → results/games.json. Original suite: `./venv/bin/python run_experiments.py`.
+`./venv/bin/python run_echofill.py` ; `./venv/bin/python echofill_cli.py --demo`.
+Original suite: `run_experiments.py`; games `run_games.py`.
 
 ## Log
-- 2026-07-04: Experiment L built + run complete (see above). Full history in
-  .cb/log/progress-archive-20260704.md (write-only, don't read back). Next: figures + writeup.
+- 2026-07-05: §11b echofill built+tested+wired (report/readme). Left: commit+push.
+  Older history in .cb/log/ (write-only, don't read back).

@@ -1072,6 +1072,46 @@ a deep, discrete tech tree can only be finished by it.
 
 ---
 
+## 11b. Doing real, LLM-priced work — data wrangling for ~$0 a column
+
+The operator's steer after Game World: point the evolved civilization at something
+*useful* — work people currently pay an LLM to do per row — and show the accumulated
+culture is what makes the agents able to do it, cheaper. Full write-up:
+**[`ECHOFILL_FINDINGS.md`](ECHOFILL_FINDINGS.md)** (`./venv/bin/python run_echofill.py`).
+
+The task is few-shot column transforms: show two or three `input=>output` examples,
+infer a deterministic program, apply it to a whole column. Three arms on the **same**
+held-out suite — a **naive** agent (empty library), a **cultured** agent (inherited the
+pieces the founder population discovered on separate training tasks), and a **real LLM**
+baseline (Haiku 4.5, cost from token accounting).
+
+| held-out task | naive | cultured |
+|---|--:|--:|
+| email → company (`split '@'` then `split '.'`) | **0%** | **100%** |
+| email → full name | **0%** | **100%** |
+| email → last name | **0%** | **100%** |
+| three single-op / param+non-param controls | 100% | 100% |
+
+Naive **3/6**, cultured **6/6**; row accuracy 46% vs 100% (LLM ~100%). The three
+misses are all **two chained parametric ops** — a program the from-scratch search
+provably cannot compose (it enumerates single ops and mixed depth-2, but not
+parametric+parametric, and halts after ~820 candidates). The cultured agent never
+searches that space: it **recombines** two inherited single-op pieces, same
+recall→recombine→modify→discover loop as everywhere else in this project. Cost to
+process 100k rows: LLM ≈ **$13**, cultured **$0.00**, at ~530 ns/row deterministic.
+
+**Why this is new, honestly.** Program-by-example synthesis itself is not (Excel
+FlashFill, Microsoft PROSE ship it, more generally than this op set). What's new is
+the *civilization* result on useful work: the reachable set of transforms is a
+property of an **accumulated, shared library that grows** — same synthesiser, same
+budget, the only difference between 0% and 100% is an inherited skill library — and
+the resulting rules are deterministic, auditable one-liners that run at zero marginal
+cost where an LLM re-derives (and can hallucinate) the transform per metered row.
+
+![naive vs cultured](figures/28_echofill_arms.png)
+
+---
+
 ## 12. Conclusions
 
 1. **Knowledge accumulates culturally — strongly.** With identical per-agent
