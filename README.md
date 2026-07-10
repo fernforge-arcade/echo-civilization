@@ -291,6 +291,30 @@ library, same synthesiser and budget, and the rules are deterministic and free a
 ./venv/bin/python echofill_cli.py --demo     # try the tool
 ```
 
+## Inventing the vocabulary — abstraction discovery (the ARC direction)
+
+*(§11c / [`ABSTRACTION_FINDINGS.md`](ABSTRACTION_FINDINGS.md))* — the deepest steer:
+stop *reusing* a fixed library and start *growing* one. Echo mines reusable concepts
+from its own solutions, scores them by compression (MDL), names them, and stacks them
+into levels — the move from *learning programs* to *learning the vocabulary programs
+are written in*. The substrate is a grid world with a perception layer
+(`pixels → objects → relations`) and a 17-op DSL, the bridge toward ARC.
+
+Three arms on the same deep held-out suite (identical solver + budget): **FLAT** (no
+invention) sits at **2.5%** forever — an oracle confirms from-scratch search solves only
+1/40 deep tasks; **INVENT** climbs to **85%** as ~9 concepts accumulate across two levels;
+**INVENT + GUIDE** (a tiny numpy proposer that *orders* search, never answers) reaches
+**97.5%** at ~9× less search. A hidden 8-op-deep program collapses to a **2-token**
+solution because the intermediate concepts had been discovered and stacked. Library
+learning by compression isn't new (DreamCoder); what's here is that loop inside the Echo
+civilization frame, with a clean ablation and no pretrained model. The ceiling is honest:
+these tasks are compositional by construction, so the right abstractions provably exist —
+real ARC's regularities are open-ended in ways this DSL can't express.
+
+```bash
+./venv/bin/python run_abstraction.py         # FLAT/INVENT/GUIDE on ARC-flavoured grids (~40s) → figures 30–32
+```
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
@@ -327,6 +351,7 @@ python3 -m venv venv
 ./venv/bin/python run_stack.py --emit --seeds 0 1 2  # §10 (~4min): resilient full-stack REST apps in Node (needs node on PATH)
 ./venv/bin/python stack_cli.py build "a blog with posts and comments" --boot  # §10 CLI: prompt it to build a real app (needs node on PATH)
 ./venv/bin/python run_games.py --seeds 0 1 2         # §11 (~several min): Game World ladder, TTT → EchoCraft
+./venv/bin/python run_abstraction.py                 # §11c (~40s): abstraction invention — FLAT/INVENT/GUIDE on ARC-flavoured grids
 ```
 
 Outputs:
@@ -365,7 +390,13 @@ Outputs:
   building real apps from a one-line prompt. Leads with **a real generated app**
   (the 6-feature `notes` reducer the strongest cultured agent emitted), then the
   frontier-over-generations table, the fresh-vs-cultured build rates, the
-  accumulation mechanism, and honest limits. **Read this for the newest result.**
+  accumulation mechanism, and honest limits.
+- **[`ABSTRACTION_FINDINGS.md`](ABSTRACTION_FINDINGS.md)** — the flagship §11c
+  write-up: Echo **inventing its own vocabulary** on ARC-flavoured grids (mine → MDL →
+  name → stack into levels). Leads with **the worked invented-concept example** (a
+  hidden 8-op program solved in 2 invented tokens), then the FLAT/INVENT/GUIDE ablation
+  table, the library-growth curves, an honest "is this new?" section, and the ARC
+  ceiling named plainly. **Read this for the newest result.**
 - `output_apps/` — **five real, openable apps** the civilization built (each an
   `index.html` + assembled reducer): counter, tip_calculator, todo, shopping_cart, notes.
 - `figures/` — 27 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the

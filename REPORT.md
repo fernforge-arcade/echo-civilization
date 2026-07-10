@@ -1112,6 +1112,63 @@ cost where an LLM re-derives (and can hallucinate) the transform per metered row
 
 ---
 
+## 11c. Experiment M — Abstraction invention (the ARC direction)
+
+Everything up to here *reuses* a fixed skill library. The operator's next steer was
+sharper: move Echo "from learning programs to learning the **vocabulary in which
+programs are written**" — invent, name, and hierarchically compose reusable concepts,
+select them by compression, and let a learned model guide the search. Full write-up:
+**[`ABSTRACTION_FINDINGS.md`](ABSTRACTION_FINDINGS.md)**
+(`./venv/bin/python run_abstraction.py`).
+
+The substrate is a grid world (`echo_civilization/gridworld_arc.py`), not a string
+world: a perception layer (`pixels → objects → relations` via connected-component
+analysis) plus a 17-op total grid→grid DSL — the bridge toward ARC. Tasks are built
+from length-2 motifs; **training** tasks are shallow and base-reachable, **held-out**
+tasks are 3–4 motifs deep and combinatorially disjoint, reachable only by composing
+invented concepts. The loop (`abstraction.py`): solve training tasks by
+iterative-deepening search → mine successful programs for recurring fragments → keep
+only those with positive MDL value (`value = occ×(len−1) − (len+1)`) → name them → re-encode
+solutions, so a fragment made of already-invented names becomes a **Level-2** concept.
+The hierarchy is never hand-authored; it emerges as the library grows. A tiny
+from-scratch numpy logistic-regression proposer (`proposer.py`) *orders* the search —
+it guides, never answers.
+
+Three arms, identical solver and budget (seeds 0–2, 6 rounds, budget 3000, 40 deep
+held-out tasks):
+
+| arm | round 1 | round 6 | search steps @ r6 | concepts | max level |
+|---|--:|--:|--:|--:|--:|
+| FLAT (no invention) | 0.025 | **0.025** | 2930 (capped) | 0 | 0 |
+| INVENT | 0.14 | **0.85** | 900 | 9.3 | 2 |
+| INVENT + GUIDE | 0.28 | **0.975** | 320 | 10.3 | 2 |
+
+FLAT never moves — an oracle check confirms from-scratch search solves only **1 of 40**
+deep tasks within budget; deep compositional tasks are out of reach of blind
+enumeration. INVENT climbs to 85% *because the vocabulary grew*; guidance takes it to
+97.5% at ~9× less search. A worked held-out example makes the point: a hidden program
+**8 base-ops deep** —
+`crop → keep_largest → sym_h → sym_v → sym_h → sym_v → tile_h → tile_v` — is solved in
+**2 tokens** (`C5_L2 → C7_L1`), because the intermediate concepts had been discovered,
+named, and stacked (`C5_L2` is itself built from a Level-1 concept). That is a lemma
+making a later proof short — Lean's move, DreamCoder's move, now Echo's.
+
+![Held-out accuracy across rounds](figures/30_abstraction_accuracy.png)
+![Library growth and levels](figures/31_abstraction_library.png)
+![Search cost falls as concepts accumulate](figures/32_abstraction_search.png)
+
+**Honestly:** library learning by compression is not new (DreamCoder does exactly this;
+FlashFill/PROSE do synthesis-by-example). What's here is that mechanism placed inside
+the Echo civilization frame — the accumulating unit becomes a *concept the system named*,
+not a program it was handed — with a clean FLAT/INVENT/GUIDE ablation and no pretrained
+model anywhere. The ceiling is equally plain: these tasks are compositional *by
+construction*, so the right abstractions provably exist; real ARC's regularities are
+open-ended and often perceptual in ways a 17-op DSL can't express. This is the honest
+first span of that bridge — where a system stops reusing a vocabulary and starts
+inventing one.
+
+---
+
 ## 12. Conclusions
 
 1. **Knowledge accumulates culturally — strongly.** With identical per-agent
@@ -1200,6 +1257,19 @@ cost where an LLM re-derives (and can hallucinate) the transform per metered row
    library (**1.00**). The civilization ships five real, openable apps in
    `output_apps/` — the accumulation thesis demonstrated on app construction itself.
 
+13. **Echo can invent its own vocabulary, not just reuse a fixed one** (§11c). The
+   deepest version of the thesis: instead of reusing a handed-in library, Echo *mines*
+   reusable concepts from its own solutions, scores them by compression (MDL), names
+   them, and stacks them into levels. On ARC-flavoured grid puzzles a from-scratch
+   search essentially cannot solve (**2.5%**, oracle-confirmed 1/40), the same solver
+   with an invention loop climbs to **85%**, and with a learned search-ordering model
+   to **97.5%** at ~9× less search. A hidden 8-op-deep program collapses to a 2-token
+   solution because the intermediate concepts had been discovered and stacked. No
+   pretrained model is used; the abstractions — including Level-2 concepts built from
+   invented Level-1 ones — emerge from compression alone. This is the move from
+   *learning programs* to *learning the vocabulary programs are written in* — the
+   honest first span of the bridge toward ARC.
+
 ---
 
 ## 13. Limitations & threats to validity
@@ -1244,6 +1314,7 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python run_builder.py --seeds 0 1 2          # §9 Builder World: build real apps in Node (needs node on PATH)
 ./venv/bin/python run_games.py --seeds 0 1 2            # §11 Game World ladder: TTT → Connect4 → minichess → EchoCraft (~several min)
 ./venv/bin/python gen_games_figures.py                 # §11 figures (reads results/games.json)
+./venv/bin/python run_abstraction.py                   # §11c Abstraction invention: FLAT/INVENT/GUIDE on ARC-flavoured grids (~40 s)
 ```
 
 **Outputs**
@@ -1265,6 +1336,9 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 - `results/games.json` — §11 Game World ladder: per-rung, per-condition learning curves + EchoCraft tech-depth/recipe/Crafter extras.
 - `GAMES_FINDINGS.md` — the flagship §11 Game-World write-up. `GAMES_PLAN.md` — the pre-registered plan.
 - `figures/games_*.png` — the four §11 figures (learning curves, tech tree, EchoCraft depth, culture-advantage bars).
+- `results/abstraction.json` — §11c abstraction-invention 3-arm results, per-round library growth & worked trace.
+- `ABSTRACTION_FINDINGS.md` — the flagship §11c write-up (leads with the worked invented-concept example).
+- `figures/30,31,32_abstraction_*.png` — §11c figures (held-out accuracy, library/levels, search cost).
 
 **Database contents (this run):**
 
