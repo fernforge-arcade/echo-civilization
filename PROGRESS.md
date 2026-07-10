@@ -1,77 +1,72 @@
 # Echo Civilization — Progress
 
 ## Goal
-Research sim: can simple learning agents accumulate knowledge over generations via a
-civilization process? (NO pretrained LLMs; numpy + stdlib only.) Experiments A–L PUBLISHED
-(GitHub fernforge-arcade/echo-civilization, main). REPORT.md is the flagship. Don't touch
-the delicate tuning of A–L or the echofill §11b work (all committed at 2a229d8).
+Research sim: can simple learning agents accumulate knowledge/capability over generations
+via a civilization process? NO pretrained LLMs; numpy + stdlib only.
 
-## CURRENT STEER (2026-07-10): ABSTRACTION INVENTION — the DreamCoder/ARC direction
-Operator's new brief: move Echo "from learning programs to learning the *vocabulary* in
-which programs are written." Invent+name+hierarchically-compose reusable concepts (not just
-reuse fixed skills); MDL-based abstraction selection; richer grid DSL + perception (ARC
-bridge); continuous cultural accumulation (one lifelong library, not generations); search +
-learned guidance. = new self-contained "Experiment M / Echo-ARC" (does NOT touch A–L).
+## STATUS: FROZEN after Experiment N (2026-07-10)
+Echo is complete and frozen at the Experiment N checkpoint. Experiments A–L, §11b (echofill),
+§11c (Experiment M, abstraction invention), and §11d (Experiment N, falsification) are all
+published on GitHub (fernforge-arcade/echo-civilization, main). REPORT.md is the flagship.
+The object-centered DSL / Mini-ARC direction has been **moved to a separate project** — do NOT
+build it inside Echo. Do NOT retune/regress any prior experiment.
 
-## Current state — EXPERIMENT M COMPLETE & COMMITTED. Engine + docs + report wiring all done.
-ABSTRACTION_FINDINGS.md written; REPORT.md §11c + conclusion #13 + §14 repro added; README.md
-section + doc-list + run cmd added. Committed & pushed to main. Nothing outstanding on this steer.
-New files (all self-contained, no edits to A–L classes):
-- `echo_civilization/gridworld_arc.py` — Echo-ARC substrate: perception (connected
-  components/objects/attributes/symmetry = pixels→objects→relations bridge) + a 17-op total
-  grid→grid DSL. Programs = tuples of op names (same shape as string world → mining/search reuse).
-- `echo_civilization/abstraction.py` — THE HEART. `Library` (hierarchical invented-op store,
-  encode/expand/levels), `solve_task` (iterative-deepening search over base+invented vocab,
-  budget-bounded), `mine_abstractions` (MDL: value = occ*(len-1) - (len+1); promote positive-
-  value recurring fragments → named ops; re-encode enables Level-2+ hierarchy).
-- `echo_civilization/arc_tasks.py` — task generator: 6 length-2 MOTIFS + favoured COMPOUNDS
-  (→ Level-2). Training shallow (1-2 motifs, base-reachable); held-out deep (3-4 motifs,
-  disjoint, reachable only via invented concepts). 5 examples/task; discards trivially-solvable.
-- `echo_civilization/proposer.py` — learned guidance: tiny per-op numpy logistic regression on
-  task features → orders search (guides, never solves). Point 8 of brief.
-- `run_abstraction.py` — 3 arms (FLAT/INVENT/INVENT+GUIDE) × seeds × rounds; writes
-  results/abstraction.json + figures/30,31,32. Worked-example trace + oracle checks included.
+## Experiment N — Falsifying M (final checkpoint). COMPLETE.
+Turns M from a designed macro-invention demo into a defensible library-learning benchmark via
+an adversarial control battery. Ran 3 seeds × 6 rounds × 38 clean held-out (~19 min).
+- Code: `echo_civilization/falsification.py`, `echo_civilization/arc_tasks_v2.py`,
+  `run_falsification.py`. Figures 33–37. Findings: `FALSIFICATION_FINDINGS.md`.
+- Raw: `results/falsification.json` (git-ignored; numbers live in the findings doc).
+- Result — M SURVIVES as synthetic hierarchical macro invention. Defensible number under
+  unseen-query scoring: invent_guide **0.667** vs full-oracle reachability ceiling 1.000.
+  Every non-oracle control fails: fresh_flat 0.0, generous_flat 0.316 (@53k evals),
+  cache_only 0.0, shuffled_lib 0.0, motif_oracle 0.316.
+- Honest negatives KEPT: (a) reusable unit is the L2 motif *pairing*, atoms alone give 0.316;
+  (b) flat wall is a compute wall (flat 0.40 @ ~80k evals) not an impossibility, and the
+  per-task gap is NOT equal-accuracy; (c) P=4 civilization 0.254 LOSES to P=1 lifelong 0.456
+  while spending MORE lifetime compute → Echo supports lifelong individual abstraction
+  learning, NOT a civilization advantage; (d) neg-transfer = ~4% branching tax.
 
-RESULT (seeds 0,1,2, 6 rounds, budget 3000): FLAT flat at 0.03 (oracle: solves 1/40, exhausts
-2930 evals). INVENT climbs 0.14→0.85 (9 concepts, max level 2). INVENT+GUIDE 0.28→0.97, 320
-evals (~3× cheaper than INVENT's 900, ~9× under FLAT's wall). Worked example: hidden 8-base-op
-task solved in 2 tokens (a Level-2 + a Level-1 concept). Hierarchy (L1 then L2) forms from
-accumulation. This demonstrates every point of the brief honestly.
+## This run (2026-07-10) — reconciliation + freeze. DONE.
+Operator changed the research boundary: stop Mini-ARC/object-DSL inside Echo, finish as an N
+checkpoint. Actions taken:
+1. Reconciled `FALSIFICATION_FINDINGS.md` with 7 caveats, all verified against code:
+   - `integrity.oracle_solvable` uses `oracle_library()` (motif-only, 6 L1), NOT full oracle
+     — relabeled as a lower-bound solvability gate.
+   - utility promotion slice is `val = train[:12]` = in-sample CURRENT-round training, not a
+     frozen validation stream — relabeled.
+   - full_oracle = reachability ceiling (hand-inserted L2 pairs), not learned generalization.
+   - behavioural-leak audit is meaningful but non-exhaustive (only tests found programs).
+   - lifetime training cost (161k–270k evals) now reported SEPARATELY from deploy cost.
+   - removed equal-accuracy framing of the ~60× gap (flat 0.40 vs guided 0.667).
+   - fixed motif wording: motifs are length-2, held-out = 3–4 motifs = 6–8 base ops.
+2. Preserved P=4 < P=1 negative; conclusion = lifelong individual learning, not civilization.
+3. Removed just-started Mini-ARC files (object_dsl.py, miniarc_tasks.py, run_miniarc.py,
+   figs 38–40, results/miniarc.json). Preserved all Experiment N + prior work.
+4. Added §11d to REPORT.md and a falsification block to README.md (both honest, measured).
+5. Focused checks PASSED: all 34 echo_civilization modules import; `run_abstraction.py
+   --quick` reproduces (INVENT+GUIDE 0.95); N modules import clean.
 
 ## What is left
-Nothing on the abstraction-invention steer — done and pushed. If the operator wants MORE on
-this thread, natural extensions (NOT started): Level-3 concepts (needs a deeper task grammar),
-a real ARC-subset task loader, or richer DSL ops (containment/counting). Otherwise await next steer.
-
-## Next concrete step
-Await operator's next direction. Experiment M shipped (engine + ABSTRACTION_FINDINGS.md +
-REPORT §11c + README + figs 30-32, committed & pushed).
+Nothing on Echo. Commit + push the N checkpoint, cb note the commit hash, stop.
+(Mini-ARC is a separate project — not started here.)
 
 ## Key decisions & why
-- New self-contained module (not edits to skills.py/culture.py/synthesis.py) → zero regression
-  risk to published A–L, mirrors how echofill §11b was added.
-- Motifs are DISCOVERED by mining, NOT handed in: training solutions found by base search, then
-  mined → the honest DreamCoder loop. Held-out is deeper + combinatorially disjoint = real
-  accumulation test, not memorization (mirrors the existing generalization guard).
-- Continuous accumulation across "rounds" with a fresh training sample each round = one lifelong
-  library (brief point 7); the depth curriculum EMERGES from library growth (not hand-sequenced).
-- budget=3000, max_len=6 (tokens), 5 examples/task: tuned so base search reaches depth≤2 only,
-  deeper tasks need invented concepts, and 5 examples kill spurious short solutions (so mined
-  fragments ≈ true motifs). Proposer is genuinely needed for the deepest (depth-4) tasks.
+- oracle_solvable is a LOWER-bound solvability gate (motif-only), not a ceiling; full_oracle
+  is the reachability ceiling. Kept distinct in prose.
+- P=1 IS the matched single-learner; P>1 pools inherited culture. P=4<P=1 kept as the load-
+  bearing honest negative — a single persistent library is NOT "culture."
 
 ## Gotchas
-- Use `./venv/bin/python`. Case-INSENSITIVE bind-mount: don't collide filenames on lowercase.
-- Long runs: python stdout is BUFFERED → the tail/output file stays empty until the end; poll
-  results/abstraction.json existence, not stdout. `ps`/`pgrep` NOT available in this container.
-- Git: `git config --global --add safe.directory /home/node/workspace` on fresh container.
+- `./venv/bin/python`. Case-INSENSITIVE bind-mount. python stdout BUFFERED (poll JSON).
+- Git: `git config --global --add safe.directory /home/node/workspace`.
   Push: `git push "https://x-access-token:${GITHUB_TOKEN}@github.com/fernforge-arcade/echo-civilization.git" main`.
-  figures/ is un-ignored (commit PNGs); results/ is git-ignored.
+  figures/ committed; results/ git-ignored (findings docs hold the numbers).
 
 ## How to run / test
-`./venv/bin/python run_abstraction.py` (canonical, ~40s) or `--quick` (1 seed, 4 rounds).
-Older experiments: run_experiments.py, run_echofill.py, run_games.py, etc.
+`./venv/bin/python run_falsification.py` (canonical N, ~19 min; `--quick` for smoke).
+`./venv/bin/python run_abstraction.py` (canonical M). Earlier: see README run block.
 
 ## Log
-- 2026-07-10: Experiment M (abstraction invention / Echo-ARC) SHIPPED — engine, 3-arm result,
-  ABSTRACTION_FINDINGS.md, REPORT §11c + conclusion #13, README section, figs 30-32, committed
-  & pushed to main. Steer complete. Older history in .cb/log/ (write-only, don't read back).
+- 2026-07-10: Reconciled N findings (7 caveats), added §11d + README block, removed Mini-ARC
+  files, froze Echo after N. Focused checks passed. Committing the N checkpoint.

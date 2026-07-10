@@ -1167,6 +1167,60 @@ open-ended and often perceptual in ways a 17-op DSL can't express. This is the h
 first span of that bridge — where a system stops reusing a vocabulary and starts
 inventing one.
 
+The 97.5% above is measured the way M ran it: on *sampled* held-out programs, scored on
+the training demonstrations, library trained on the same stream. That number does not
+survive an adversarial re-run — see §11d.
+
+---
+
+## 11d. Experiment N — Falsifying Experiment M (Echo's final checkpoint)
+
+M was a designed demonstration; N re-runs it as a benchmark under adversarial controls to
+find out which claims survive. Full write-up:
+**[`FALSIFICATION_FINDINGS.md`](FALSIFICATION_FINDINGS.md)**
+(`./venv/bin/python run_falsification.py`, 3 seeds × 6 rounds × 38 clean held-out tasks).
+Three changes do the work: every task gets an **unseen query grid** and only counts as
+solved if the program reproduces the exact query output (kills "fit the demos, score on the
+demos"); held-out tasks reachable by a training solution are dropped as **behavioural
+leaks** (2 of 40); train/eval are split by **motif *pairing***, not sampled program.
+
+Matched conditions, query-scored:
+
+| condition | held-out acc | deploy evals/task | what it tests |
+|---|--:|--:|---|
+| fresh_flat | 0.000 | 3000 | the M baseline |
+| shuffled_lib | 0.000 | 3000 | size-matched useless library |
+| cache_only | 0.000 | 10 | exact-solution cache, no ID/grid retrieval |
+| motif_oracle | 0.316 | 2317 | the 6 true motifs only |
+| generous_flat | 0.316 | 53118 | flat, len ≤8, 60k budget |
+| invent | 0.544 | 1798 | learned library, MDL promotion |
+| **invent_guide** | **0.667** | 1360 | learned library + proposer |
+| full_oracle | 1.000 | 1259 | motifs + all L2 pairs (reachability ceiling) |
+
+What survives, stated honestly:
+
+- **The learned library beats every non-oracle control** under query scoring, including a
+  *generous* flat solver (0.316 at 53k evals/task). The "vocabulary helps" claim is not a
+  demo-scoring artifact.
+- **The flat wall is a compute wall, not an impossibility.** Given ~80k evals/task a flat
+  solver reaches 0.40 — so the library's edge is a lower per-task *deploy* cost plus a
+  modest accuracy gain, not something flat search provably cannot do. The per-task figure is
+  *not* equal-accuracy (flat 0.40 vs guided 0.667) and excludes the library's 161k–270k
+  lifetime training cost, reported separately in the findings.
+- **The reusable unit is the L2 pairing.** Handing over the 6 atoms (motif_oracle) gives only
+  0.316; full_oracle's 1.000 is a *reachability ceiling* from a hand-inserted library, not
+  learned generalization.
+- **The population "civilization" condition loses.** A single lifelong learner (P=1) reaches
+  0.456; splitting matched work across 4 culture-sharing agents (P=4) reaches only 0.254
+  while spending *more* lifetime compute. So **Echo currently supports lifelong individual
+  abstraction learning, not a civilization advantage** — we do not call a single persistent
+  library "culture."
+
+The defensible M number under unseen-query scoring is **invent_guide 0.667** against a
+1.000 reachability ceiling — not 97.5%. Echo is frozen at this checkpoint; the
+object-centered / Mini-ARC direction has been moved to a separate project rather than
+expanded here.
+
 ---
 
 ## 12. Conclusions

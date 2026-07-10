@@ -315,6 +315,27 @@ real ARC's regularities are open-ended in ways this DSL can't express.
 ./venv/bin/python run_abstraction.py         # FLAT/INVENT/GUIDE on ARC-flavoured grids (~40s) → figures 30–32
 ```
 
+### Falsifying it — Experiment N (Echo's final checkpoint)
+
+*(§11d / [`FALSIFICATION_FINDINGS.md`](FALSIFICATION_FINDINGS.md))* — M's 97.5% was scored
+on training demos with sampled held-out programs. N re-runs it under adversarial controls:
+an **unseen query grid per task** (solved only if the exact query output is reproduced), a
+**behavioural-leak filter**, and a **motif-pairing holdout**. The learned library still
+beats every non-oracle control — a fresh flat solver (0.00), a *generous* flat solver (0.316
+at 53k evals/task), an exact-solution cache (0.00), and a size-matched useless library
+(0.00) — but the defensible number drops to **invent_guide 0.667** against a 1.000
+reachability ceiling. Three claims get trimmed: the flat wall is a compute wall not an
+impossibility (flat reaches 0.40 at ~80k evals/task, and this is *not* an equal-accuracy
+comparison); the reusable unit is the L2 motif *pairing*, not the atoms; and a 4-agent
+culture-sharing population (0.254) *loses* to a single lifelong learner (0.456) while
+spending more compute. **Echo currently supports lifelong individual abstraction learning,
+not a civilization advantage.** Echo is frozen here; the object-centered / Mini-ARC
+direction moved to a separate project.
+
+```bash
+./venv/bin/python run_falsification.py       # 9 matched conditions, query-scored (~19 min) → figures 33–37
+```
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
@@ -396,7 +417,15 @@ Outputs:
   name → stack into levels). Leads with **the worked invented-concept example** (a
   hidden 8-op program solved in 2 invented tokens), then the FLAT/INVENT/GUIDE ablation
   table, the library-growth curves, an honest "is this new?" section, and the ARC
-  ceiling named plainly. **Read this for the newest result.**
+  ceiling named plainly.
+- **[`FALSIFICATION_FINDINGS.md`](FALSIFICATION_FINDINGS.md)** — the flagship §11d
+  write-up and **Echo's final checkpoint**: M re-run under unseen-query scoring,
+  behavioural-leak filtering, and motif-pairing holdout. Leads with the matched-condition
+  table (defensible number invent_guide **0.667** vs a 1.000 reachability ceiling), reports
+  lifetime training cost separately from deploy cost, and states the honest negatives
+  plainly — the flat wall is compute not impossibility, the reusable unit is the L2 pairing,
+  and the population "civilization" condition **loses** to a single lifelong learner.
+  **Read this for the newest result.**
 - `output_apps/` — **five real, openable apps** the civilization built (each an
   `index.html` + assembled reducer): counter, tip_calculator, todo, shopping_cart, notes.
 - `figures/` — 27 PNGs (incl. computer-curriculum, real-OS, autonomous-firm, the
