@@ -13,6 +13,9 @@ __pycache__/
 # figures/ are committed so the README renders on GitHub; the DB/results stay out.
 results/
 
+# nmmo-generated map cache (regenerated on run)
+maps/
+
 # OS
 .DS_Store
 Thumbs.db

@@ -1223,6 +1223,62 @@ expanded here.
 
 ---
 
+## 11e. Experiment O — the whole thesis, inside real Neural MMO 2.0
+
+Every result up to here runs on environments we built. The operator's steer: does it survive
+in a world we didn't write? [Neural MMO 2.0](https://neuralmmo.github.io) is a 128×128-tile
+MMO — resources, foraging, professions, up to hundreds of concurrent agents. We put Echo's
+civilization machinery inside a live `nmmo==2.1.1` and re-ran the same test. Every generation
+is scored by a real episode (12 agents, 180 steps); capability is the rollout outcome — tiles
+covered and charted, resources provisioned, profession tiles reached — not a surrogate.
+
+Competence is a depth-4 cartography/foraging skill DAG, not network weights:
+
+```
+move(0) -> explore(1) -> catalog(2) -> forage(3) -> harvest(4)
+```
+
+Each rung is a hand-written controller primitive; an agent runs the deepest rung it has
+**mastered** and falls back down the chain. The ladder is monotone in the real world — deeper
+mastered stacks strictly out-forage shallow ones (mean rollout capability: move 2.1 →
+explore 2.4 → catalog 14.9 → forage 28.3 → harvest 119.7, a 57× spread).
+
+Culture can matter because of a **proficiency valley**: discovery is rare and steepens per
+tier (`p = 0.25·0.5^tier`, a rung discoverable only once its prereq is mastered), and a freshly
+discovered rung is fitness-*neutral* until practiced to mastery (solo `+0.1`/gen, ≈10
+generations). In-progress rungs earn nothing, so selection can't protect them and an isolated
+lineage drifts back down the valley. Same four conditions as everywhere else: A single agent
+wiped each generation; B population with inheritance only; C adds a cultural ratchet (bank the
+best proficiency any top agent reached per rung, newborns start there); D adds reputation-directed
+teaching. Run: A–D × seeds [0,1,2] × 50 generations.
+
+Mean mastered skill-chain depth over generations, and final capability:
+
+| cond | g0 | g10 | g20 | g30 | g40 | final maxF | final meanCap |
+|---|---|---|---|---|---|---|---|
+| A · isolated | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.0 | 3.6 |
+| B · inheritance | 0.00 | 0.25 | 0.67 | 0.67 | 1.67 | 1.7 | 11.1 |
+| C · + ratchet | 0.00 | 0.33 | 1.00 | 2.00 | 3.00 | 3.0 | 32.6 |
+| D · full civ | 0.00 | 0.33 | 1.00 | 2.00 | 3.00 | 3.0 | 32.6 |
+
+![capability across generations in Neural MMO 2.0](figures/nmmo_01_capability.png)
+
+A never leaves the floor. B climbs but stalls shallow — each lineage must discover *and* cross
+the valley alone, and most lose it to drift. C banks the population's best mastery so practice
+adds up across lineages, crosses the valley, and reaches roughly 3× B's capability. Generation
+49 of C forages at depths generation 1 could not — because mastery accumulated in the shared
+pool, not because any controller changed. The civilization effect reproduces in a world we
+didn't design.
+
+**C ≈ D, reported straight.** Teaching adds nothing measurable here, and that's the honest
+reading: when *discovery* is the binding constraint, the ratchet already carries the value —
+once one agent masters a rung, every newborn inherits it, leaving teaching (which only speeds
+practice of an already-discovered rung) little to do. Teaching would pull ahead in a
+practice-bound regime (slower practice, cheaper discovery). We report C ≈ D as measured rather
+than retuning the world until D wins. Full write-up and figures: [`NMMO_FINDINGS.md`](NMMO_FINDINGS.md).
+
+---
+
 ## 12. Conclusions
 
 1. **Knowledge accumulates culturally — strongly.** With identical per-agent

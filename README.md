@@ -336,6 +336,25 @@ direction moved to a separate project.
 ./venv/bin/python run_falsification.py       # 9 matched conditions, query-scored (~19 min) → figures 33–37
 ```
 
+### The thesis inside a real game — Experiment O (Neural MMO 2.0)
+
+*(§11e / [`NMMO_FINDINGS.md`](NMMO_FINDINGS.md))* — the operator's steer: does the civilization
+effect survive in a world we didn't write? We put Echo's machinery inside a live
+[Neural MMO 2.0](https://neuralmmo.github.io) (`nmmo==2.1.1`) and scored every generation by a
+real 12-agent, 180-step episode. Competence is a depth-4 foraging skill DAG
+(`move→explore→catalog→forage→harvest`, a monotone 57× capability ladder); a **proficiency valley**
+(rare discovery + fitness-neutral practice until mastery) makes partial progress fragile, so
+culture has something to carry. Across seeds [0,1,2] × 50 generations: isolated A never leaves
+the floor (capability 3.6), inheritance-only B stalls shallow (11.1), and the cultural ratchet
+C crosses the valley to reach ≈3× B (32.6). Generation 49 forages at depths generation 1 could
+not — because mastery accumulated in the shared pool. Teaching (D) ties C, reported straight:
+when *discovery* is the bottleneck, the ratchet already carries the value. The civilization
+effect reproduces in a real MMO.
+
+```bash
+/home/node/nmmoenv/bin/python run_nmmo.py     # A–D × seeds [0,1,2] × 50 gens in real nmmo (~9 min) → figures nmmo_01–04
+```
+
 ## Roadmap (raising the level of abstraction)
 
 Done: worlds 0–7 above, plus the Computer-Use **Frontier** (learned command
